@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Montserrat, Plus_Jakarta_Sans } from "next/font/google";
+import Script from "next/script";
 import "./globals.css";
 
 const montserrat = Montserrat({
@@ -36,9 +37,23 @@ export default async function RootLayout({
       lang={lang}
       className={`${montserrat.variable} ${plusJakartaSans.variable} h-full antialiased dark`}
     >
+      <head>
+        <Script
+          id="microsoft-clarity"
+          strategy="afterInteractive"
+          dangerouslySetInnerHTML={{
+            __html: `(function(c,l,a,r,i,t,y){
+        c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
+        t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
+        y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
+    })(window, document, "clarity", "script", "xwt02pcgel");`,
+          }}
+        />
+      </head>
       <body className="min-h-full flex flex-col bg-zinc-950 text-zinc-50 font-sans selection:bg-lime-400 selection:text-zinc-950">
         {children}
       </body>
     </html>
   );
 }
+
