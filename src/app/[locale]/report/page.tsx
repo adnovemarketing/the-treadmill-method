@@ -18,7 +18,6 @@ import {
   AlertTriangle,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { VISUAL_ASSETS } from "@/config/visualAssets";
 import { trackEvent } from "@/core/utils/analytics";
 import { CRO_FLAGS } from "@/config/flags";
 
@@ -271,15 +270,11 @@ export default function ReportPage() {
           {/* Imagem Ilustrativa do Plano */}
           <div className="w-full h-72 relative rounded-2xl overflow-hidden border border-zinc-900/80 mt-1 bg-zinc-950">
             <Image
-              src={
-                plan.name === t.report.inclineHiitName
-                  ? VISUAL_ASSETS.treadmill.inclineWalking
-                  : VISUAL_ASSETS.treadmill.experienceMan
-              }
+              src="/assets/characters/sarah/after/sarah-after.png"
               alt={locale === "pt-br" ? `Ilustração do treino ${plan.name}` : `Illustration of the ${plan.name} treadmill plan`}
               fill
               sizes="(max-width: 768px) 100vw, 512px"
-              className="object-contain object-top"
+              className="object-cover object-top"
             />
           </div>
 

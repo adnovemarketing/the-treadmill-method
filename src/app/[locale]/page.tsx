@@ -69,12 +69,12 @@ export default function HomePage() {
             {/* Imagem Mobile (Apenas em dispositivos móveis) */}
             <div className="md:hidden w-full aspect-[16/10] relative rounded-2xl overflow-hidden border border-zinc-900">
               <Image
-                src="/treadmill_woman_hero.png"
+                src="/assets/characters/sarah/after/sarah-after.png"
                 alt={t.landing.titleFirstPart}
                 fill
                 sizes="(max-width: 768px) 100vw"
                 priority
-                className="object-cover object-center"
+                className="object-cover object-top"
               />
               <div className="absolute inset-0 bg-gradient-to-t from-zinc-950 via-zinc-950/20 to-transparent" />
             </div>
@@ -145,12 +145,12 @@ export default function HomePage() {
           <div className="md:col-span-5 hidden md:flex flex-col gap-6 justify-center order-1 md:order-2">
             <div className="w-full aspect-[4/3] relative rounded-3xl overflow-hidden border border-zinc-900 shadow-2xl">
               <Image
-                src="/treadmill_woman_hero.png"
+                src="/assets/characters/sarah/after/sarah-after.png"
                 alt={t.landing.titleFirstPart}
                 fill
                 sizes="(min-width: 768px) 33vw"
                 priority
-                className="object-cover object-center"
+                className="object-cover object-top"
               />
               <div className="absolute inset-0 bg-gradient-to-t from-zinc-950/80 via-zinc-950/0 to-transparent" />
             </div>

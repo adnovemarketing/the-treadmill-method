@@ -276,7 +276,7 @@ export default function CheckoutPage() {
                       alt={locale === "pt-br" ? "Plano de caminhada 100% personalizado" : "100% personalised treadmill walking plan"}
                       fill
                       sizes="(max-width: 640px) 100vw, 250px"
-                      className="object-cover transition-transform duration-700 group-hover:scale-105"
+                      className="object-cover object-top transition-transform duration-700 group-hover:scale-105"
                     />
                   </div>
                   <div className="p-3">
@@ -299,7 +299,7 @@ export default function CheckoutPage() {
                       alt={locale === "pt-br" ? "Acompanhamento e evolução de queima calórica" : "Weekly progress and metabolic tracking"}
                       fill
                       sizes="(max-width: 640px) 100vw, 250px"
-                      className="object-cover transition-transform duration-700 group-hover:scale-105"
+                      className="object-cover object-top transition-transform duration-700 group-hover:scale-105"
                     />
                   </div>
                   <div className="p-3">
@@ -322,7 +322,7 @@ export default function CheckoutPage() {
                       alt={locale === "pt-br" ? "Treinos para fazer em casa ou na academia" : "Train at home or your local gym"}
                       fill
                       sizes="(max-width: 640px) 100vw, 250px"
-                      className="object-cover transition-transform duration-700 group-hover:scale-105"
+                      className="object-cover object-top transition-transform duration-700 group-hover:scale-105"
                     />
                   </div>
                   <div className="p-3">
@@ -345,7 +345,7 @@ export default function CheckoutPage() {
                       alt={locale === "pt-br" ? "Rotina flexível para qualquer horário" : "Flexible scheduling for busy lifestyles"}
                       fill
                       sizes="(max-width: 640px) 100vw, 250px"
-                      className="object-cover transition-transform duration-700 group-hover:scale-105"
+                      className="object-cover object-top transition-transform duration-700 group-hover:scale-105"
                     />
                   </div>
                   <div className="p-3">
@@ -442,7 +442,6 @@ export default function CheckoutPage() {
                   alt={locale === "pt-br" ? "Mapeamento Completo do Método de Esteira" : "Complete Treadmill Method Roadmap"}
                   fill
                   sizes="192px"
-                  priority
                   className="object-contain"
                 />
               </div>
