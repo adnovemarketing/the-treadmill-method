@@ -164,7 +164,7 @@ export function StepLoadingCalculation({ onNext }: StepProps) {
           alt={locale === "pt-br" ? "Processando seu plano de caminhada personalizado" : "Processing your personalised treadmill walking plan"}
           fill
           sizes="33vw"
-          className="object-cover transition-transform duration-700 group-hover:scale-105"
+          className="object-contain object-bottom transition-transform duration-700 group-hover:scale-105"
         />
         <div className="absolute inset-0 bg-gradient-to-t from-zinc-950 via-zinc-950/20 to-transparent" />
         <div className="relative z-10 flex flex-col gap-1">

@@ -30,7 +30,7 @@ export function StepAgeSelection({ onNext }: StepProps) {
           alt={t.quiz.steps.ageSelection.options["18_24"].label}
           fill
           sizes="(max-width: 768px) 100vw, 50vw"
-          className="object-cover"
+          className="object-contain object-bottom"
         />
       )
     },
@@ -44,7 +44,7 @@ export function StepAgeSelection({ onNext }: StepProps) {
           alt={t.quiz.steps.ageSelection.options["25_34"].label}
           fill
           sizes="(max-width: 768px) 100vw, 50vw"
-          className="object-cover"
+          className="object-contain object-bottom"
         />
       )
     },
@@ -58,7 +58,7 @@ export function StepAgeSelection({ onNext }: StepProps) {
           alt={t.quiz.steps.ageSelection.options["35_44"].label}
           fill
           sizes="(max-width: 768px) 100vw, 50vw"
-          className="object-cover"
+          className="object-contain object-bottom"
         />
       )
     },
@@ -72,7 +72,7 @@ export function StepAgeSelection({ onNext }: StepProps) {
           alt={t.quiz.steps.ageSelection.options["45_54"].label}
           fill
           sizes="(max-width: 768px) 100vw, 50vw"
-          className="object-cover"
+          className="object-contain object-bottom"
         />
       )
     },
@@ -86,7 +86,7 @@ export function StepAgeSelection({ onNext }: StepProps) {
           alt={t.quiz.steps.ageSelection.options["55_plus"].label}
           fill
           sizes="(max-width: 768px) 100vw, 100vw"
-          className="object-cover"
+          className="object-contain object-bottom"
         />
       )
     },

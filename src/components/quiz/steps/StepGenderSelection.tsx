@@ -29,7 +29,7 @@ export function StepGenderSelection({ onNext }: StepProps) {
           alt={t.quiz.steps.genderSelection.female.label}
           fill
           sizes="(max-width: 768px) 100vw, 33vw"
-          className="object-cover"
+          className="object-contain object-bottom"
         />
       ),
     },
@@ -43,7 +43,7 @@ export function StepGenderSelection({ onNext }: StepProps) {
           alt={t.quiz.steps.genderSelection.male.label}
           fill
           sizes="(max-width: 768px) 100vw, 33vw"
-          className="object-cover"
+          className="object-contain object-bottom"
         />
       ),
     },
@@ -57,7 +57,7 @@ export function StepGenderSelection({ onNext }: StepProps) {
           alt={t.quiz.steps.genderSelection.other.label}
           fill
           sizes="(max-width: 768px) 100vw, 33vw"
-          className="object-cover"
+          className="object-contain object-bottom"
         />
       ),
     },

@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import Image from "next/image";
 import { QuizStep } from "@/core/types/quiz";
 import { Button } from "@/components/ui/button";
 import { useTranslations } from "@/core/i18n/translations";
@@ -132,6 +133,46 @@ export function StepEducationalTransition({ onNext }: StepProps) {
           <span>15 MIN</span>
           <span>30 MIN</span>
         </div>
+      </div>
+
+      {/* Bloco Ilustrativo de Comparação Antes e Depois (Local A: Denise 45-65) */}
+      <div className="md:col-span-12 mt-2 bg-zinc-950/60 border border-zinc-900 p-4 rounded-2xl flex flex-col items-center gap-3">
+        <span className="text-[10px] font-heading font-black text-brand-lime uppercase tracking-widest">
+          {locale === "pt-br" ? "EVOLUÇÃO ILUSTRATIVA DE ADAPTAÇÃO METABÓLICA" : "ILLUSTRATIVE METABOLIC PROGRESSION"}
+        </span>
+        <div className="grid grid-cols-2 gap-4 w-full max-w-sm">
+          <div className="flex flex-col items-center gap-1.5">
+            <div className="w-full aspect-[3/4] relative rounded-xl overflow-hidden border border-zinc-800 bg-zinc-900">
+              <Image
+                src="/assets/characters/denise/before/denise-before.png"
+                alt="Initial baseline illustration"
+                fill
+                sizes="(max-width: 768px) 45vw, 180px"
+                className="object-contain object-bottom"
+              />
+            </div>
+            <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider">
+              {locale === "pt-br" ? "Início" : "Initial State"}
+            </span>
+          </div>
+          <div className="flex flex-col items-center gap-1.5">
+            <div className="w-full aspect-[3/4] relative rounded-xl overflow-hidden border border-brand-lime/30 bg-zinc-900 shadow-md shadow-lime-500/5">
+              <Image
+                src="/assets/characters/denise/after/denise-after.png"
+                alt="Progressive adaptation illustration"
+                fill
+                sizes="(max-width: 768px) 45vw, 180px"
+                className="object-contain object-bottom"
+              />
+            </div>
+            <span className="text-[10px] font-bold text-brand-lime uppercase tracking-wider">
+              {locale === "pt-br" ? "Resultado Pretendido" : "Target Progression"}
+            </span>
+          </div>
+        </div>
+        <p className="text-[9px] text-zinc-500 text-center italic mt-0.5">
+          Illustrative transformation. Individual results vary.
+        </p>
       </div>
     </div>
   );

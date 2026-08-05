@@ -96,7 +96,7 @@ export function StepImportantEvent({ onNext }: StepProps) {
           alt={locale === "pt-br" ? "Evento importante planejado" : "Planned important event"}
           fill
           sizes="33vw"
-          className="object-cover transition-transform duration-700 group-hover:scale-105"
+          className="object-contain object-bottom transition-transform duration-700 group-hover:scale-105"
         />
         <div className="absolute inset-0 bg-gradient-to-t from-zinc-950 via-zinc-950/20 to-transparent" />
         <div className="relative z-10 flex flex-col gap-1">

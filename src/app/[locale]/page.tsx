@@ -74,7 +74,7 @@ export default function HomePage() {
                 fill
                 sizes="(max-width: 768px) 100vw"
                 priority
-                className="object-cover object-top"
+                className="object-contain object-bottom"
               />
               <div className="absolute inset-0 bg-gradient-to-t from-zinc-950 via-zinc-950/20 to-transparent" />
             </div>
@@ -150,7 +150,7 @@ export default function HomePage() {
                 fill
                 sizes="(min-width: 768px) 33vw"
                 priority
-                className="object-cover object-top"
+                className="object-contain object-bottom"
               />
               <div className="absolute inset-0 bg-gradient-to-t from-zinc-950/80 via-zinc-950/0 to-transparent" />
             </div>

@@ -182,7 +182,7 @@ export function StepReportProjection({ onNext }: StepProps) {
             fill
             sizes="280px"
             priority
-            className="object-cover transition-transform duration-700 group-hover:scale-105"
+            className="object-contain object-bottom transition-transform duration-700 group-hover:scale-105"
           />
         </div>
         <div className="p-3 flex flex-col gap-0.5 border-t border-zinc-900 bg-zinc-900/20">

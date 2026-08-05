@@ -120,7 +120,7 @@ export function StepInjuryTriage({ onNext }: StepProps) {
             alt={locale === "pt-br" ? "Proteção e Triagem Articular" : "Joint Protection and Triage"}
             fill
             sizes="280px"
-            className="object-cover transition-transform duration-700 group-hover:scale-105"
+            className="object-contain object-top transition-transform duration-700 group-hover:scale-105"
           />
         </div>
         <div className="p-3 flex flex-col gap-0.5 border-t border-zinc-900 bg-zinc-900/20">

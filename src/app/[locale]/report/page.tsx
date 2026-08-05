@@ -267,15 +267,55 @@ export default function ReportPage() {
             </p>
           </div>
 
-          {/* Imagem Ilustrativa do Plano */}
+          {/* Imagem Ilustrativa do Plano (Preset A - Full Body / Portrait) */}
           <div className="w-full h-72 relative rounded-2xl overflow-hidden border border-zinc-900/80 mt-1 bg-zinc-950">
             <Image
               src="/assets/characters/sarah/after/sarah-after.png"
               alt={locale === "pt-br" ? `Ilustração do treino ${plan.name}` : `Illustration of the ${plan.name} treadmill plan`}
               fill
               sizes="(max-width: 768px) 100vw, 512px"
-              className="object-cover object-top"
+              className="object-contain object-bottom"
             />
+          </div>
+
+          {/* Bloco Ilustrativo de Comparação Antes e Depois (Local B: Sarah 55+) */}
+          <div className="bg-zinc-950/80 border border-zinc-900 p-4 rounded-2xl flex flex-col items-center gap-3 mt-1">
+            <span className="text-[9px] font-heading font-black text-brand-teal uppercase tracking-widest">
+              {locale === "pt-br" ? "PROJEÇÃO VISUAL DE CONDICIONAMENTO" : "VISUAL FITNESS TRAJECTORY"}
+            </span>
+            <div className="grid grid-cols-2 gap-4 w-full max-w-sm">
+              <div className="flex flex-col items-center gap-1.5">
+                <div className="w-full aspect-[3/4] relative rounded-xl overflow-hidden border border-zinc-800 bg-zinc-900">
+                  <Image
+                    src="/assets/characters/sarah/before/sarah-before.png"
+                    alt="Before walk method baseline"
+                    fill
+                    sizes="(max-width: 768px) 45vw, 180px"
+                    className="object-contain object-bottom"
+                  />
+                </div>
+                <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider">
+                  {locale === "pt-br" ? "Linha de Base" : "Baseline"}
+                </span>
+              </div>
+              <div className="flex flex-col items-center gap-1.5">
+                <div className="w-full aspect-[3/4] relative rounded-xl overflow-hidden border border-brand-teal/30 bg-zinc-900 shadow-md shadow-teal-500/5">
+                  <Image
+                    src="/assets/characters/sarah/after/sarah-after.png"
+                    alt="After walk method milestones"
+                    fill
+                    sizes="(max-width: 768px) 45vw, 180px"
+                    className="object-contain object-bottom"
+                  />
+                </div>
+                <span className="text-[10px] font-bold text-brand-teal uppercase tracking-wider">
+                  {locale === "pt-br" ? "Projeção Final" : "Final Milestone"}
+                </span>
+              </div>
+            </div>
+            <p className="text-[9px] text-zinc-500 text-center italic">
+              Illustrative transformation. Individual results vary.
+            </p>
           </div>
 
           {/* Cards de Semana com linha conectora (Linha de Tempo) */}
