@@ -8,9 +8,9 @@ import { useLocale } from "@/core/i18n/useLocale";
 import { cn } from "@/lib/utils";
 import { trackEvent } from "@/core/utils/analytics";
 import { useQuizStore } from "@/core/store/quizStore";
-import { QuizStep } from "@/core/types/quiz";
+import { QuizData, QuizStep } from "@/core/types/quiz";
 
-function getAnsweredValueForStep(step: QuizStep, data: any) {
+function getAnsweredValueForStep(step: QuizStep, data: QuizData) {
   switch (step) {
     case 'onboarding-basics':
       return data.primaryGoal;

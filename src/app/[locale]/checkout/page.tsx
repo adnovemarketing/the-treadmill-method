@@ -8,7 +8,6 @@ import { useTranslations } from "@/core/i18n/translations";
 import { getMarketConfig, formatCurrency } from "@/core/i18n/config";
 import { useParams } from "next/navigation";
 import {
-  ShieldCheck,
   CreditCard,
   Lock,
   ChevronDown,
@@ -57,15 +56,16 @@ export default function CheckoutPage() {
   const { data: quizData } = useQuizStore();
 
   const [selectedPlan, setSelectedPlan] = useState<"monthly" | "quarterly">("quarterly");
-  const [timeLeft, setTimeLeft] = useState<number>(900);
-
-  useEffect(() => {
-    const savedTime = sessionStorage.getItem("treadmill-method-timer");
-    if (savedTime) {
-      const parsedTime = parseInt(savedTime, 10);
-      if (parsedTime > 0) setTimeLeft(parsedTime);
+  const [timeLeft, setTimeLeft] = useState<number>(() => {
+    if (typeof window !== "undefined") {
+      const savedTime = sessionStorage.getItem("treadmill-method-timer");
+      if (savedTime) {
+        const parsedTime = parseInt(savedTime, 10);
+        if (parsedTime > 0) return parsedTime;
+      }
     }
-  }, []);
+    return 900;
+  });
 
   useEffect(() => {
     if (timeLeft <= 0) return;

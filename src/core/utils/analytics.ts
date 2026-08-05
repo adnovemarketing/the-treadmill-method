@@ -13,7 +13,9 @@ export type AnalyticsEvent =
   | 'plan_selected'
   | 'checkout_clicked';
 
-export function trackEvent(event: AnalyticsEvent, params: Record<string, any> = {}) {
+export type AnalyticsPayload = Record<string, string | number | boolean | null | undefined | unknown>;
+
+export function trackEvent(event: AnalyticsEvent, params: AnalyticsPayload = {}) {
   if (typeof window === 'undefined') return;
 
   const timestamp = new Date().toISOString();
