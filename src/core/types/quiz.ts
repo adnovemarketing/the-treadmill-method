@@ -53,7 +53,20 @@ export interface QuizData {
   preferredWorkoutTime: PreferredWorkoutTime | null;
   readyToChange: boolean | null;
   email: string | null;
+  profileId?: string | null;
 }
+
+export interface QuizProfileApiRequest {
+  email: string;
+  quizData: QuizData;
+}
+
+export interface QuizProfileApiResponse {
+  success: boolean;
+  profile_id?: string;
+  error?: string;
+}
+
 
 export type QuizStep =
   | 'onboarding-basics'

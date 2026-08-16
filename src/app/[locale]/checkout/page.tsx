@@ -15,6 +15,7 @@ import {
   Star,
   Users,
   CheckCircle,
+  Loader2,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { VISUAL_ASSETS } from "@/config/visualAssets";
@@ -56,6 +57,9 @@ export default function CheckoutPage() {
   const { data: quizData } = useQuizStore();
 
   const [selectedPlan, setSelectedPlan] = useState<"monthly" | "quarterly">("quarterly");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
   const [timeLeft, setTimeLeft] = useState<number>(() => {
     if (typeof window !== "undefined") {
       const savedTime = sessionStorage.getItem("treadmill-method-timer");
@@ -100,15 +104,64 @@ export default function CheckoutPage() {
     return `${m.toString().padStart(2, "0")}:${s.toString().padStart(2, "0")}`;
   };
 
-  const handleCheckout = () => {
-    const selectedPrice = selectedPlan === "quarterly" 
-      ? formatCurrency(config.prices.quarterly, locale)
-      : formatCurrency(config.prices.monthly, locale);
+  const handleCheckout = async () => {
+    if (isSubmitting) return;
 
-    trackEvent("checkout_clicked", { plan: selectedPlan, price: selectedPrice, locale });
+    const profileId = quizData.profileId;
+    if (!profileId) {
+      setError(
+        locale === "pt-br"
+          ? "Perfil do quiz não encontrado. Por favor, refaça o quiz para continuar."
+          : "Quiz profile not found. Please complete the quiz first to access your custom plan."
+      );
+      return;
+    }
 
-    window.location.assign("https://buy.stripe.com/6oU6oG8rLb3F51q8ytfEk00");
+    setError(null);
+    setIsSubmitting(true);
+
+    try {
+      const selectedPrice = selectedPlan === "quarterly" 
+        ? formatCurrency(config.prices.quarterly, locale)
+        : formatCurrency(config.prices.monthly, locale);
+
+      trackEvent("checkout_clicked", { plan: selectedPlan, price: selectedPrice, locale, profileId });
+
+      const response = await fetch("/api/checkout/create", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          profile_id: profileId,
+          locale,
+        }),
+      });
+
+      const resData = await response.json();
+
+      if (!response.ok || !resData.success || !resData.url) {
+        throw new Error(
+          resData.error ||
+            (locale === "pt-br"
+              ? "Erro ao iniciar o pagamento. Tente novamente."
+              : "Failed to create checkout session. Please try again.")
+        );
+      }
+
+      window.location.assign(resData.url);
+    } catch (err: unknown) {
+      const msg =
+        err instanceof Error
+          ? err.message
+          : locale === "pt-br"
+          ? "Erro de conexão. Tente novamente."
+          : "Connection error. Please try again.";
+      setError(msg);
+      setIsSubmitting(false);
+    }
   };
+
 
   const qPrice = formatCurrency(config.prices.quarterly, locale);
   const qPriceOriginal = formatCurrency(config.prices.quarterlyOriginal, locale);
@@ -470,13 +523,34 @@ export default function CheckoutPage() {
 
             {/* Botão de Compra CTA principal */}
             <div className="flex flex-col gap-2.5">
+              {error && (
+                <p className="text-xs text-red-500 font-semibold bg-red-500/10 p-3 rounded-xl border border-red-500/20 text-center animate-shake">
+                  {error}
+                </p>
+              )}
               <Button
                 onClick={handleCheckout}
-                className="w-full bg-brand-lime text-zinc-950 hover:bg-brand-lime-hover font-heading font-bold text-sm tracking-wide py-7 rounded-2xl transition-all cursor-pointer flex items-center justify-center gap-2 shadow-lg shadow-lime-400/10"
+                disabled={isSubmitting}
+                className={cn(
+                  "w-full font-heading font-bold text-sm tracking-wide py-7 rounded-2xl transition-all cursor-pointer flex items-center justify-center gap-2 shadow-lg shadow-lime-400/10",
+                  isSubmitting
+                    ? "bg-zinc-800 text-zinc-500 cursor-not-allowed"
+                    : "bg-brand-lime text-zinc-950 hover:bg-brand-lime-hover"
+                )}
               >
-                <CreditCard className="w-4 h-4" />
-                {t.offer.ctaButton}
+                {isSubmitting ? (
+                  <>
+                    <Loader2 className="w-4 h-4 animate-spin text-zinc-950" />
+                    <span>{locale === "pt-br" ? "Redirecionando..." : "Redirecting to checkout..."}</span>
+                  </>
+                ) : (
+                  <>
+                    <CreditCard className="w-4 h-4" />
+                    {t.offer.ctaButton}
+                  </>
+                )}
               </Button>
+
 
               {/* Selos de Confiança (Fase 3) */}
               <div className="grid grid-cols-2 gap-2.5 mt-2 bg-zinc-900/10 border border-zinc-900/60 p-4.5 rounded-3xl">

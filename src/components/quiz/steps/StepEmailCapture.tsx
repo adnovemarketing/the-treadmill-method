@@ -1,17 +1,18 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import Image from "next/image";
 import { useQuizStore } from "@/core/store/quizStore";
 import { Button } from "@/components/ui/button";
 import { useTranslations } from "@/core/i18n/translations";
 import { useLocale } from "@/core/i18n/useLocale";
-import { Mail, Shield, Check } from "lucide-react";
+import { Mail, Shield, Check, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useRouter } from "next/navigation";
 import { VISUAL_ASSETS } from "@/config/visualAssets";
 import { trackEvent } from "@/core/utils/analytics";
 import { CRO_FLAGS } from "@/config/flags";
+import { QuizProfileApiResponse } from "@/core/types/quiz";
 
 export function StepEmailCapture() {
   const { data, updateData } = useQuizStore();
@@ -21,6 +22,8 @@ export function StepEmailCapture() {
   const [email, setEmail] = useState(data.email || "");
   const [consent, setConsent] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const submittingRef = useRef(false);
   const router = useRouter();
 
   useEffect(() => {
@@ -31,24 +34,75 @@ export function StepEmailCapture() {
     return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailStr);
   };
 
-  const handleNext = () => {
+  const handleNext = async () => {
+    if (isSubmitting || submittingRef.current) return;
+
     if (!validateEmail(email)) {
       setError(t.emailCapture.errorInvalid);
       return;
     }
 
+    const normalizedEmail = email.trim().toLowerCase();
     setError(null);
-    updateData({ email });
+    setIsSubmitting(true);
+    submittingRef.current = true;
 
-    // Envia evento de Analytics
-    trackEvent("lead_submitted", {
-      email,
-      consent,
-      locale,
-    });
+    try {
+      const currentStoreData = useQuizStore.getState().data;
+      const fullQuizPayload = {
+        ...currentStoreData,
+        email: normalizedEmail,
+      };
 
-    // Redireciona o usuário para o Relatório Personalizado (/report)
-    router.push(`/${locale}/report`);
+      const response = await fetch("/api/quiz/profile", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          email: normalizedEmail,
+          quizData: fullQuizPayload,
+        }),
+      });
+
+      const result: QuizProfileApiResponse = await response.json();
+
+      if (!response.ok || !result.success || !result.profile_id) {
+        throw new Error(
+          result.error ||
+            (locale === "pt-br"
+              ? "Ocorreu um erro ao salvar seu perfil. Tente novamente."
+              : "An error occurred saving your profile. Please try again.")
+        );
+      }
+
+      // Salva no estado local do Zustand (preserva UX e session)
+      updateData({
+        email: normalizedEmail,
+        profileId: result.profile_id,
+      });
+
+      // Envia evento de Analytics
+      trackEvent("lead_submitted", {
+        email: normalizedEmail,
+        consent,
+        locale,
+        profileId: result.profile_id,
+      });
+
+      // Redireciona o usuário para o Relatório Personalizado (/report)
+      router.push(`/${locale}/report`);
+    } catch (err: unknown) {
+      const errorMessage =
+        err instanceof Error
+          ? err.message
+          : locale === "pt-br"
+          ? "Erro na conexão. Tente novamente."
+          : "Connection error. Please try again.";
+      setError(errorMessage);
+      setIsSubmitting(false);
+      submittingRef.current = false;
+    }
   };
 
   const isValid = validateEmail(email);
@@ -75,13 +129,14 @@ export function StepEmailCapture() {
             <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500" />
             <input
               type="email"
+              disabled={isSubmitting}
               value={email}
               onChange={(e) => {
                 setEmail(e.target.value);
                 if (error) setError(null);
               }}
               placeholder={t.emailCapture.placeholder}
-              className="w-full bg-zinc-950 border border-zinc-800 focus:border-brand-lime focus:ring-1 focus:ring-brand-lime rounded-xl pl-12 pr-4 py-4 text-sm text-zinc-100 placeholder:text-zinc-600 focus:outline-none transition-all"
+              className="w-full bg-zinc-950 border border-zinc-800 focus:border-brand-lime focus:ring-1 focus:ring-brand-lime rounded-xl pl-12 pr-4 py-4 text-sm text-zinc-100 placeholder:text-zinc-600 focus:outline-none transition-all disabled:opacity-50"
             />
           </div>
 
@@ -94,8 +149,9 @@ export function StepEmailCapture() {
           {/* Consentimento de Marketing */}
           <button
             type="button"
+            disabled={isSubmitting}
             onClick={() => setConsent(!consent)}
-            className="flex items-start gap-3 text-left hover:text-zinc-300 transition-colors p-1"
+            className="flex items-start gap-3 text-left hover:text-zinc-300 transition-colors p-1 disabled:opacity-50"
           >
             <div
               className={cn(
@@ -116,22 +172,30 @@ export function StepEmailCapture() {
         {/* Botão de Envio */}
         <Button
           onClick={handleNext}
-          disabled={!isValid}
+          disabled={!isValid || isSubmitting}
           className={cn(
-            "w-full font-heading font-bold text-sm tracking-wide py-6 rounded-2xl transition-all cursor-pointer",
-            isValid
+            "w-full font-heading font-bold text-sm tracking-wide py-6 rounded-2xl transition-all cursor-pointer flex items-center justify-center gap-2",
+            isValid && !isSubmitting
               ? "bg-brand-lime text-zinc-950 hover:bg-brand-lime-hover"
               : "bg-zinc-800 text-zinc-500 cursor-not-allowed"
           )}
         >
-          {CRO_FLAGS.emailContextualCta
-            ? (isValid
+          {isSubmitting ? (
+            <>
+              <Loader2 className="w-4 h-4 animate-spin text-zinc-950" />
+              <span>{locale === "pt-br" ? "Gerando plano..." : "Saving profile..."}</span>
+            </>
+          ) : CRO_FLAGS.emailContextualCta ? (
+            isValid
               ? t.emailCapture.cta
               : locale === "pt-br"
               ? "Digite seu e-mail para continuar"
-              : "Enter your email to continue")
-            : t.emailCapture.cta}
+              : "Enter your email to continue"
+          ) : (
+            t.emailCapture.cta
+          )}
         </Button>
+
 
         {/* Rodapé de Confiança */}
         <div className="flex items-center justify-center gap-2 text-zinc-600 border-t border-zinc-900/60 pt-4">

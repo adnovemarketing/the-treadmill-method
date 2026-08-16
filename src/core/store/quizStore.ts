@@ -42,7 +42,9 @@ const initialQuizData: QuizData = {
   preferredWorkoutTime: null,
   readyToChange: null,
   email: null,
+  profileId: null,
 };
+
 
 export const useQuizStore = create<QuizState>()(
   persist(
