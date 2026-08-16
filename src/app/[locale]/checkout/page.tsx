@@ -104,15 +104,10 @@ export default function CheckoutPage() {
     const selectedPrice = selectedPlan === "quarterly" 
       ? formatCurrency(config.prices.quarterly, locale)
       : formatCurrency(config.prices.monthly, locale);
-    const planName = selectedPlan === "quarterly" ? t.offer.quarterlyLabel : t.offer.monthlyLabel;
 
     trackEvent("checkout_clicked", { plan: selectedPlan, price: selectedPrice, locale });
 
-    alert(
-      locale === "pt-br" 
-        ? `Redirecionando para o gateway de pagamento seguro.\nPlano Selecionado: ${planName} (${selectedPrice})`
-        : `Redirecting to secure payment gateway.\nSelected Plan: ${planName} (${selectedPrice})`
-    );
+    window.location.assign("https://buy.stripe.com/6oU6oG8rLb3F51q8ytfEk00");
   };
 
   const qPrice = formatCurrency(config.prices.quarterly, locale);

@@ -15,6 +15,13 @@ export type AnalyticsEvent =
 
 export type AnalyticsPayload = Record<string, string | number | boolean | null | undefined | unknown>;
 
+declare global {
+  interface Window {
+    fbq?: (...args: unknown[]) => void;
+    _fbq?: unknown;
+  }
+}
+
 export function trackEvent(event: AnalyticsEvent, params: AnalyticsPayload = {}) {
   if (typeof window === 'undefined') return;
 
@@ -25,8 +32,22 @@ export function trackEvent(event: AnalyticsEvent, params: AnalyticsPayload = {})
     url: window.location.href,
   });
 
-  // Em um ambiente real, integraríamos com Firebase Analytics, GTM, GA4, ou Meta Pixel:
-  // if (window.gtag) {
-  //   window.gtag('event', event, params);
-  // }
+  // Meta Pixel integration
+  if (typeof window.fbq === 'function') {
+    const standardEvents: Record<string, string> = {
+      landing_view: 'PageView',
+      lead_submitted: 'Lead',
+      checkout_clicked: 'InitiateCheckout',
+      offer_viewed: 'ViewContent',
+      quiz_started: 'StartTrial',
+      plan_selected: 'AddToCart',
+    };
+
+    const fbEvent = standardEvents[event];
+    if (fbEvent) {
+      window.fbq('track', fbEvent, params);
+    } else {
+      window.fbq('trackCustom', event, params);
+    }
+  }
 }
