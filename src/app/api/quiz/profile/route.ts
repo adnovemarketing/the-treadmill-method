@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseServerClient } from '@/lib/supabaseServer';
 import { QuizProfileApiRequest, QuizProfileApiResponse } from '@/core/types/quiz';
+import { generatePersonalisedPlan } from '@/core/personalisation/engine';
 
 export async function POST(request: NextRequest) {
   try {
@@ -31,12 +32,20 @@ export async function POST(request: NextRequest) {
     }
 
     const supabase = getSupabaseServerClient();
+    const plan = generatePersonalisedPlan(quizData);
 
     const { data: insertedRecord, error: insertError } = await supabase
       .from('quiz_profiles')
       .insert({
         email: normalizedEmail,
         quiz_data: { ...quizData, email: normalizedEmail },
+        programme: plan.programme,
+        starting_level: plan.starting_level,
+        sessions_per_week: plan.sessions_per_week,
+        goal_focus: plan.goal_focus,
+        personal_strategy: plan.personal_strategy,
+        preferred_workout_time: plan.preferred_workout_time,
+        personalised_explanation: plan.personalised_explanation,
         status: 'pending',
       })
       .select('id')

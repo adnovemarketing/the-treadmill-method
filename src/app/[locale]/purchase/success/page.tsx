@@ -3,9 +3,11 @@ import { Header } from '@/components/common/Header';
 import { getStripeServerClient } from '@/lib/stripeServer';
 import { CheckCircle2, ShieldCheck, AlertCircle } from 'lucide-react';
 
+import { getSupabaseServerClient } from '@/lib/supabaseServer';
+
 interface SuccessPageProps {
   params: Promise<{ locale: string }>;
-  searchParams: Promise<{ session_id?: string }>;
+  searchParams: Promise<{ session_id?: string | string[] }>;
 }
 
 export default async function PurchaseSuccessPage({
@@ -13,30 +15,84 @@ export default async function PurchaseSuccessPage({
   searchParams,
 }: SuccessPageProps) {
   const { locale = 'en-gb' } = await params;
-  const { session_id } = await searchParams;
+  const resolvedSearchParams = await searchParams;
+  const rawSessionId = resolvedSearchParams?.session_id;
+  const sessionId = Array.isArray(rawSessionId)
+    ? rawSessionId[0]?.trim()
+    : rawSessionId?.trim();
 
   let isValidSession = false;
   let customerEmail: string | null = null;
 
-  if (session_id && typeof session_id === 'string') {
+  if (sessionId && typeof sessionId === 'string') {
+    // 1. Primary Check: Retrieve Checkout Session from Stripe SDK
     try {
       const stripe = getStripeServerClient();
-      const session = await stripe.checkout.sessions.retrieve(session_id);
+      const session = await stripe.checkout.sessions.retrieve(sessionId);
       if (
         session &&
-        (session.payment_status === 'paid' || session.status === 'complete')
+        (session.payment_status === 'paid' ||
+          session.status === 'complete' ||
+          session.payment_status === 'no_payment_required')
       ) {
         isValidSession = true;
         customerEmail =
-          session.customer_details?.email || session.customer_email || null;
+          session.customer_details?.email ||
+          session.customer_email ||
+          (typeof session.customer === 'object' &&
+          session.customer &&
+          'email' in session.customer
+            ? (session.customer as { email?: string }).email
+            : null) ||
+          null;
       }
     } catch (err: unknown) {
-      console.error('[Purchase Success Verification Error]:', err);
-      isValidSession = false;
+      console.error(
+        '[Purchase Success Stripe Verification Warning]:',
+        err instanceof Error ? err.message : 'Stripe retrieval failed'
+      );
+    }
+
+    // 2. Secondary / Fallback Check: Check authoritative public.purchases table in Supabase
+    if (!isValidSession) {
+      try {
+        const supabase = getSupabaseServerClient();
+        const { data: purchase } = await supabase
+          .from('purchases')
+          .select('id, payment_status, profile_id')
+          .eq('stripe_checkout_session_id', sessionId)
+          .maybeSingle();
+
+        if (
+          purchase &&
+          ['paid', 'completed', 'active', 'succeeded'].includes(
+            purchase.payment_status?.toLowerCase() || ''
+          )
+        ) {
+          isValidSession = true;
+
+          if (!customerEmail && purchase.profile_id) {
+            const { data: profile } = await supabase
+              .from('quiz_profiles')
+              .select('email')
+              .eq('id', purchase.profile_id)
+              .maybeSingle();
+            if (profile?.email) {
+              customerEmail = profile.email;
+            }
+          }
+        }
+      } catch (dbErr: unknown) {
+        console.error(
+          '[Purchase Success DB Verification Error]:',
+          dbErr instanceof Error ? dbErr.message : 'Database check failed'
+        );
+      }
     }
   }
 
   const isPtBr = locale.toLowerCase() === 'pt-br';
+
 
   return (
     <div className="min-h-screen bg-zinc-950 text-zinc-50 flex flex-col justify-between selection:bg-brand-lime selection:text-zinc-950">
@@ -66,33 +122,42 @@ export default async function PurchaseSuccessPage({
 
                 <p className="text-xs md:text-sm text-zinc-300 font-semibold leading-relaxed mt-1">
                   {isPtBr
-                    ? 'Seu pagamento foi recebido. Estamos preparando seu programa personalizado.'
-                    : "Your payment has been received. We're preparing your personalised programme."}
+                    ? 'Use o e-mail da sua compra para acessar seu programa.'
+                    : 'Use the email address from your purchase to access your programme.'}
                 </p>
 
                 {customerEmail && (
                   <p className="text-[11px] text-zinc-500 mt-1">
                     {isPtBr
-                      ? `Confirmação enviada para: ${customerEmail}`
-                      : `Receipt and confirmation sent to: ${customerEmail}`}
+                      ? `E-mail da compra: ${customerEmail}`
+                      : `Purchase email: ${customerEmail}`}
                   </p>
                 )}
               </div>
+
+              {/* Access CTA Button */}
+              <a
+                href={`/${locale}/login${customerEmail ? `?email=${encodeURIComponent(customerEmail)}` : ''}`}
+                className="w-full bg-brand-lime text-zinc-950 hover:bg-brand-lime-hover font-heading font-bold text-xs tracking-wide py-4 rounded-xl transition-all flex items-center justify-center gap-2 shadow-lg shadow-lime-400/10"
+              >
+                {isPtBr ? 'Acessar Meu Programa' : 'Access My Programme'}
+              </a>
 
               {/* Status Info Box */}
               <div className="w-full bg-zinc-950 border border-zinc-900 p-4 rounded-2xl flex items-center gap-3 text-left">
                 <ShieldCheck className="w-5 h-5 text-brand-teal shrink-0" />
                 <div className="flex flex-col gap-0.5">
                   <span className="text-[10px] font-heading font-extrabold text-zinc-300 uppercase tracking-wider">
-                    {isPtBr ? 'ACESSO AO PLANO' : 'PROGRAMME PREPARATION'}
+                    {isPtBr ? 'ACESSO AO PLANO' : 'PROGRAMME ACCESS'}
                   </span>
                   <span className="text-[10px] text-zinc-400 leading-normal">
                     {isPtBr
-                      ? 'Seu perfil foi vinculado com sucesso ao seu pedido. Você receberá os guias e atualizações no seu e-mail.'
-                      : 'Your quiz profile is securely linked to your purchase. Access details and guides are being dispatched.'}
+                      ? 'Seu perfil foi vinculado com sucesso ao seu pedido. Clique no botão acima para receber seu link de acesso seguro.'
+                      : 'Your quiz profile is securely linked to your purchase. Click above to request your secure access link.'}
                   </span>
                 </div>
               </div>
+
             </>
           ) : (
             <>

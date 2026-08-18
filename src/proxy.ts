@@ -1,10 +1,12 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
+import { createServerClient } from '@supabase/ssr';
+
 const locales = ['en-gb', 'pt-br'];
 const defaultLocale = 'en-gb';
 
-export function proxy(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   // 1. Verificar se a URL já possui localidade válida
@@ -13,12 +15,36 @@ export function proxy(request: NextRequest) {
   );
 
   if (pathnameHasLocale) {
-    // Definir/atualizar o cookie com a localidade atual da URL para persistência
     const pathLocale = pathname.split('/')[1];
-    const response = NextResponse.next();
+    let response = NextResponse.next({ request });
+
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+    const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
+
+    if (supabaseUrl && supabaseKey) {
+      const supabase = createServerClient(supabaseUrl, supabaseKey, {
+        cookies: {
+          getAll() {
+            return request.cookies.getAll();
+          },
+          setAll(cookiesToSet) {
+            cookiesToSet.forEach(({ name, value }) =>
+              request.cookies.set(name, value)
+            );
+            response = NextResponse.next({ request });
+            cookiesToSet.forEach(({ name, value, options }) =>
+              response.cookies.set(name, value, options)
+            );
+          },
+        },
+      });
+      await supabase.auth.getUser();
+    }
+
     response.cookies.set('locale', pathLocale, { maxAge: 365 * 24 * 60 * 60, path: '/' });
     return response;
   }
+
 
   // 2. Detecção automática na ausência da localidade na URL
   // Prioridade 1: Cookie 'locale'
