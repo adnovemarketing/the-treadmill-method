@@ -280,6 +280,9 @@ export interface TranslationSchema {
     congratsBadge: string;
     urgencyTitle: string;
     planSectionTitle: string;
+    singleLabel: string;
+    singleBadge: string;
+    singleSub: string;
     quarterlyLabel: string;
     quarterlyBadge: string;
     monthlyLabel: string;
@@ -614,7 +617,10 @@ export const translations: Record<Locale, TranslationSchema> = {
     offer: {
       congratsBadge: 'CONGRATULATIONS! LAUNCH OFFER ACTIVE',
       urgencyTitle: 'OFFER EXPIRES IN',
-      planSectionTitle: 'Select your membership plan:',
+      planSectionTitle: 'YOUR PERSONALISED OFFER:',
+      singleLabel: 'The Treadmill Method — Full Access',
+      singleBadge: 'ONE-TIME PAYMENT',
+      singleSub: 'Single one-time payment. Full access with no subscription or recurring fees.',
       quarterlyLabel: '3-Month Membership',
       quarterlyBadge: 'MOST POPULAR / BEST VALUE',
       monthlyLabel: '1-Month Membership',
@@ -660,8 +666,8 @@ export const translations: Record<Locale, TranslationSchema> = {
           a: 'If you decide the method is not for you within 30 days, just email support@thetreadmillmethod.com for an immediate 100% refund.'
         },
         {
-          q: 'Does membership renew automatically?',
-          a: 'Yes. To keep your plan access active, memberships renew automatically at the end of each period. You can cancel easily with one click in your dashboard.'
+          q: 'Is this a recurring subscription?',
+          a: 'No. This is a single, one-time payment. There are no recurring fees, hidden charges, or automatic renewals.'
         }
       ],
       legalDisclaimer: 'By clicking "GET MY PERSONALISED PLAN NOW" you agree to our Terms of Use and Privacy Policy. Individual results may vary depending on consistency and starting metabolic condition.',
@@ -978,7 +984,10 @@ export const translations: Record<Locale, TranslationSchema> = {
     offer: {
       congratsBadge: 'PARABÉNS! DESCONTO DE LANÇAMENTO ATIVO',
       urgencyTitle: 'DESCONTO EXPIRA EM',
-      planSectionTitle: 'Escolha seu plano de assinatura:',
+      planSectionTitle: 'SUA OFERTA PERSONALIZADA:',
+      singleLabel: 'The Treadmill Method — Acesso Completo',
+      singleBadge: 'PAGAMENTO ÚNICO',
+      singleSub: 'Pagamento único. Acesso completo sem mensalidades ou cobranças recorrentes.',
       quarterlyLabel: 'Acesso por 3 Meses',
       quarterlyBadge: 'MAIS POPULAR / MELHOR CUSTO',
       monthlyLabel: 'Acesso por 1 Mês',
@@ -1024,8 +1033,8 @@ export const translations: Record<Locale, TranslationSchema> = {
           a: 'Se em até 30 dias você decidir que o método não é para você, basta nos enviar um e-mail para suporte@thetreadmillmethod.com e processamos o estorno de 100% do seu valor imediatamente.'
         },
         {
-          q: 'A assinatura é renovada de forma automática?',
-          a: 'Sim. Para manter a continuidade do seu cronograma de treinos e o acesso à plataforma, a assinatura é renovada automaticamente no final de cada período a menos que você cancele.'
+          q: 'Este pagamento é uma assinatura recorrente?',
+          a: 'Não. Este é um pagamento único. Não há cobranças mensais, renovações automáticas nem taxas ocultas.'
         }
       ],
       legalDisclaimer: 'Ao clicar em "OBTER MEU PLANO PERSONALIZADO AGORA" você concorda com nossos Termos de Uso e Política de Privacidade. Resultados individuais podem variar dependendo da consistência e taxa metabólica inicial.',

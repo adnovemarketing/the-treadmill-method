@@ -7,6 +7,7 @@ export interface MarketConfig {
     monthlyOriginal: number;
     quarterly: number;
     quarterlyOriginal: number;
+    single: number;
   };
   dateFormat: string;
   weightUnitDefault: 'kg' | 'lb';
@@ -27,6 +28,7 @@ export const marketConfigs: Record<Locale, MarketConfig> = {
       monthlyOriginal: 49.99,
       quarterly: 24.99,
       quarterlyOriginal: 99.99,
+      single: 9.90,
     },
     dateFormat: 'en-GB',
     weightUnitDefault: 'kg',
@@ -41,6 +43,7 @@ export const marketConfigs: Record<Locale, MarketConfig> = {
       monthlyOriginal: 197.00,
       quarterly: 97.00,
       quarterlyOriginal: 397.00,
+      single: 9.90,
     },
     dateFormat: 'pt-BR',
     weightUnitDefault: 'kg',

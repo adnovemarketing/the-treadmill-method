@@ -56,7 +56,6 @@ export default function CheckoutPage() {
   const config = getMarketConfig(locale);
   const { data: quizData } = useQuizStore();
 
-  const [selectedPlan, setSelectedPlan] = useState<"monthly" | "quarterly">("quarterly");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -89,15 +88,6 @@ export default function CheckoutPage() {
     trackEvent("offer_viewed", { locale });
   }, [locale]);
 
-  const isFirstRender = useRef(true);
-  useEffect(() => {
-    if (isFirstRender.current) {
-      isFirstRender.current = false;
-      return;
-    }
-    trackEvent("plan_selected", { plan: selectedPlan, locale });
-  }, [selectedPlan, locale]);
-
   const formatTime = (seconds: number) => {
     const m = Math.floor(seconds / 60);
     const s = seconds % 60;
@@ -121,11 +111,9 @@ export default function CheckoutPage() {
     setIsSubmitting(true);
 
     try {
-      const selectedPrice = selectedPlan === "quarterly" 
-        ? formatCurrency(config.prices.quarterly, locale)
-        : formatCurrency(config.prices.monthly, locale);
+      const selectedPrice = formatCurrency(config.prices.single, locale);
 
-      trackEvent("checkout_clicked", { plan: selectedPlan, price: selectedPrice, locale, profileId });
+      trackEvent("checkout_clicked", { plan: "single_9_90", price: selectedPrice, locale, profileId });
 
       const response = await fetch("/api/checkout/create", {
         method: "POST",
@@ -163,15 +151,7 @@ export default function CheckoutPage() {
   };
 
 
-  const qPrice = formatCurrency(config.prices.quarterly, locale);
-  const qPriceOriginal = formatCurrency(config.prices.quarterlyOriginal, locale);
-  const mPrice = formatCurrency(config.prices.monthly, locale);
-  const mPriceOriginal = formatCurrency(config.prices.monthlyOriginal, locale);
-
-  const qPerDayVal = (config.prices.quarterly / 90).toFixed(2);
-  const mPerDayVal = (config.prices.monthly / 30).toFixed(2);
-  const qPerDay = formatCurrency(parseFloat(qPerDayVal), locale);
-  const mPerDay = formatCurrency(parseFloat(mPerDayVal), locale);
+  const singlePrice = formatCurrency(config.prices.single, locale);
 
   // Personalised plan name for the checkout headline
   const getPersonalisedLabel = () => {
@@ -222,92 +202,30 @@ export default function CheckoutPage() {
               </span>
             </div>
 
-            {/* Seletor de Planos */}
+            {/* Oferta Única */}
             <div className="flex flex-col gap-3">
               <h2 className="text-xs font-heading font-extrabold text-zinc-400 uppercase tracking-wide px-1">
                 {t.offer.planSectionTitle}
               </h2>
 
-              {/* Plano Trimestral */}
-              <button
-                type="button"
-                onClick={() => setSelectedPlan("quarterly")}
-                className={cn(
-                  "w-full text-left p-5 rounded-2xl border transition-all cursor-pointer relative flex flex-col gap-2 select-none",
-                  selectedPlan === "quarterly"
-                    ? "bg-zinc-900 border-brand-lime shadow-lg shadow-lime-400/5"
-                    : "bg-zinc-900/40 border-zinc-900 hover:border-zinc-800"
-                )}
-              >
-                {/* Tag Mais Popular */}
+              <div className="w-full text-left p-5 rounded-2xl border bg-zinc-900 border-brand-lime shadow-lg shadow-lime-400/5 relative flex flex-col gap-2 select-none">
+                {/* Tag Pagamento Único */}
                 <span className="absolute -top-2.5 right-4 bg-brand-lime text-zinc-950 text-[9px] font-black font-heading px-2 py-0.5 rounded-full uppercase tracking-wider">
-                  {t.offer.quarterlyBadge}
+                  {t.offer.singleBadge}
                 </span>
 
                 <div className="flex justify-between items-center">
                   <div className="flex items-center gap-3">
-                    <div
-                      className={cn(
-                        "w-4 h-4 rounded-full border flex items-center justify-center transition-all",
-                        selectedPlan === "quarterly" ? "border-brand-lime" : "border-zinc-700 bg-zinc-950"
-                      )}
-                    >
-                      {selectedPlan === "quarterly" && (
-                        <div className="w-2.5 h-2.5 rounded-full bg-brand-lime" />
-                      )}
-                    </div>
-                    <span className="text-sm font-bold text-zinc-100">{t.offer.quarterlyLabel}</span>
+                    <span className="text-sm font-bold text-zinc-100">{t.offer.singleLabel}</span>
                   </div>
                   <div className="text-right">
-                    <span className="text-[10px] text-zinc-500 line-through block">{qPriceOriginal}</span>
-                    <span className="text-base font-heading font-black text-brand-lime">{qPrice}</span>
+                    <span className="text-base font-heading font-black text-brand-lime">{singlePrice}</span>
                   </div>
                 </div>
                 <div className="border-t border-zinc-900 pt-2 flex justify-between items-center text-[10px] text-zinc-400">
-                  <span>{t.offer.quarterlySub}</span>
-                  <span className="font-semibold text-brand-teal uppercase">
-                    {t.offer.quarterlyPerDay.replace("{price}", qPerDay)}
-                  </span>
+                  <span>{t.offer.singleSub}</span>
                 </div>
-              </button>
-
-              {/* Plano Mensal */}
-              <button
-                type="button"
-                onClick={() => setSelectedPlan("monthly")}
-                className={cn(
-                  "w-full text-left p-5 rounded-2xl border transition-all cursor-pointer relative flex flex-col gap-2 select-none",
-                  selectedPlan === "monthly"
-                    ? "bg-zinc-900 border-brand-lime shadow-lg shadow-lime-400/5"
-                    : "bg-zinc-900/40 border-zinc-900 hover:border-zinc-800"
-                )}
-              >
-                <div className="flex justify-between items-center">
-                  <div className="flex items-center gap-3">
-                    <div
-                      className={cn(
-                        "w-4 h-4 rounded-full border flex items-center justify-center transition-all",
-                        selectedPlan === "monthly" ? "border-brand-lime" : "border-zinc-700 bg-zinc-950"
-                      )}
-                    >
-                      {selectedPlan === "monthly" && (
-                        <div className="w-2.5 h-2.5 rounded-full bg-brand-lime" />
-                      )}
-                    </div>
-                    <span className="text-sm font-bold text-zinc-100">{t.offer.monthlyLabel}</span>
-                  </div>
-                  <div className="text-right">
-                    <span className="text-[10px] text-zinc-500 line-through block">{mPriceOriginal}</span>
-                    <span className="text-base font-heading font-black text-zinc-100">{mPrice}</span>
-                  </div>
-                </div>
-                <div className="border-t border-zinc-900 pt-2 flex justify-between items-center text-[10px] text-zinc-400">
-                  <span>{t.offer.monthlySub}</span>
-                  <span className="font-semibold text-zinc-300 uppercase">
-                    {t.offer.monthlyPerDay.replace("{price}", mPerDay)}
-                  </span>
-                </div>
-              </button>
+              </div>
             </div>
 
              {/* Benefícios Principais (Fase 3) */}
