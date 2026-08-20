@@ -16,6 +16,7 @@ export default async function ProgressPage({ params }: ProgressPageProps) {
   const { locale = 'en-gb' } = await params;
   const isPtBr = locale.toLowerCase() === 'pt-br';
 
+  // 1. Authenticate user server-side
   const supabase = await createSupabaseServerAppClient();
   const { data } = await supabase.auth.getUser();
 
@@ -24,21 +25,25 @@ export default async function ProgressPage({ params }: ProgressPageProps) {
   }
 
   const user = data.user;
-  const entitlement = await checkAndLinkUserEntitlement(user.id, user.email || '');
 
+  // 2. Enforce entitlement guard
+  const entitlement = await checkAndLinkUserEntitlement(user.id, user.email || '');
   if (!entitlement.hasEntitlement) {
     redirect(`/${locale}/no-access`);
   }
 
-  const personalisation = await getUserPersonalisedProfile(user.id, locale);
+  // 3. Parallel execution of independent progress & personalisation reads after entitlement verification
+  const [personalisation, progressRecords, postRecords] = await Promise.all([
+    getUserPersonalisedProfile(user.id, locale),
+    getUserProgrammeProgress(user.id),
+    getUserPostProgrammeProgress(user.id),
+  ]);
+
   if (!personalisation.success || !personalisation.plan) {
     redirect(`/${locale}/no-access`);
   }
 
   const plan = personalisation.plan;
-  const progressRecords = await getUserProgrammeProgress(user.id);
-  const postRecords = await getUserPostProgrammeProgress(user.id);
-
   const completedIds = progressRecords.map((r) => r.programme_session_id);
   const completedDurations = progressRecords.map((r) => r.duration_minutes);
 

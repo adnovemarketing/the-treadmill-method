@@ -46,7 +46,7 @@ export async function getUserProgrammeProgress(userId: string): Promise<Programm
 
   const { data, error } = await supabase
     .from('programme_progress')
-    .select('*')
+    .select('id, user_id, profile_id, programme_session_id, completed_at, duration_minutes, difficulty, could_continue, note')
     .eq('user_id', userId)
     .order('completed_at', { ascending: true });
 
@@ -66,7 +66,7 @@ export async function getUserPostProgrammeProgress(userId: string): Promise<Post
 
   const { data, error } = await supabase
     .from('post_programme_progress')
-    .select('*')
+    .select('id, user_id, profile_id, cycle_id, cycle_number, action_type, programme_session_id, session_position, completed_at, duration_minutes, difficulty, could_continue, note')
     .eq('user_id', userId)
     .order('completed_at', { ascending: true });
 
@@ -86,7 +86,7 @@ export async function getUserPostProgrammeCycles(userId: string): Promise<PostPr
 
   const { data, error } = await supabase
     .from('post_programme_cycles')
-    .select('*')
+    .select('id, user_id, profile_id, programme, action_type, cycle_number, status, created_at, completed_at')
     .eq('user_id', userId)
     .order('cycle_number', { ascending: true });
 
@@ -106,7 +106,7 @@ export async function getUserActivePostProgrammeCycle(userId: string): Promise<P
 
   const { data, error } = await supabase
     .from('post_programme_cycles')
-    .select('*')
+    .select('id, user_id, profile_id, programme, action_type, cycle_number, status, created_at, completed_at')
     .eq('user_id', userId)
     .eq('status', 'active')
     .maybeSingle();
@@ -180,7 +180,7 @@ export async function recordSessionCompletion(
         onConflict: 'user_id,programme_session_id',
       }
     )
-    .select('*')
+    .select('id, user_id, profile_id, programme_session_id, completed_at, duration_minutes, difficulty, could_continue, note')
     .single();
 
   if (error || !data) {
@@ -242,7 +242,7 @@ export async function startPostProgrammeCycle(
       status: 'active',
       created_at: new Date().toISOString(),
     })
-    .select('*')
+    .select('id, user_id, profile_id, programme, action_type, cycle_number, status, created_at, completed_at')
     .single();
 
   if (error) {
@@ -280,7 +280,7 @@ export async function recordPostProgrammeCompletion(
   // 1. Validate active cycle ownership server-side
   const { data: cycle, error: cycleErr } = await supabase
     .from('post_programme_cycles')
-    .select('*')
+    .select('id, user_id, profile_id, programme, action_type, cycle_number, status, created_at, completed_at')
     .eq('id', cycleId)
     .eq('user_id', userId)
     .single();
@@ -296,7 +296,7 @@ export async function recordPostProgrammeCompletion(
   // 2. Resolve existing completions for this cycle
   const { data: existingProgress } = await supabase
     .from('post_programme_progress')
-    .select('*')
+    .select('id, user_id, profile_id, cycle_id, cycle_number, action_type, programme_session_id, session_position, completed_at, duration_minutes, difficulty, could_continue, note')
     .eq('cycle_id', cycleId)
     .order('session_position', { ascending: true });
 
@@ -347,14 +347,14 @@ export async function recordPostProgrammeCompletion(
       could_continue: couldContinue || null,
       note: note ? note.trim().slice(0, 300) : null,
     })
-    .select('*')
+    .select('id, user_id, profile_id, cycle_id, cycle_number, action_type, programme_session_id, session_position, completed_at, duration_minutes, difficulty, could_continue, note')
     .single();
 
   if (insertErr) {
     // Handle double-submit race condition on UNIQUE(cycle_id, session_position)
     const { data: raceCheck } = await supabase
       .from('post_programme_progress')
-      .select('*')
+      .select('id, user_id, profile_id, cycle_id, cycle_number, action_type, programme_session_id, session_position, completed_at, duration_minutes, difficulty, could_continue, note')
       .eq('cycle_id', cycleId)
       .eq('session_position', expectedPosition)
       .maybeSingle();

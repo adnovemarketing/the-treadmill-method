@@ -9,10 +9,9 @@ import {
   getUserProgrammeProgress,
   getUserPostProgrammeProgress,
   getUserActivePostProgrammeCycle,
-  getUserAllProgressRecords,
 } from '@/lib/progressServer';
 import { calculateProgrammeProgress } from '@/core/programmes/helpers';
-import { getAdaptiveGuidance } from '@/core/programmes/adaptive';
+import { getAdaptiveGuidance, ProgressRecordLike } from '@/core/programmes/adaptive';
 import { getPostProgrammeCycleSessions } from '@/core/programmes/postProgramme';
 import { Trophy, Play, ArrowRight, Sparkles, Compass, Calendar, Target, Info, AlertTriangle } from 'lucide-react';
 
@@ -24,6 +23,7 @@ export default async function MemberDashboardPage({ params }: AppPageProps) {
   const { locale = 'en-gb' } = await params;
   const isPtBr = locale.toLowerCase() === 'pt-br';
 
+  // 1. Authenticate user server-side
   const supabase = await createSupabaseServerAppClient();
   const { data } = await supabase.auth.getUser();
 
@@ -32,14 +32,21 @@ export default async function MemberDashboardPage({ params }: AppPageProps) {
   }
 
   const user = data.user;
-  const entitlement = await checkAndLinkUserEntitlement(user.id, user.email || '');
 
+  // 2. Enforce entitlement guard
+  const entitlement = await checkAndLinkUserEntitlement(user.id, user.email || '');
   if (!entitlement.hasEntitlement) {
     redirect(`/${locale}/no-access`);
   }
 
-  // Fetch personalised profile & completed progress
-  const personalisation = await getUserPersonalisedProfile(user.id, locale);
+  // 3. Parallel execution of independent member-data reads after entitlement verification
+  const [personalisation, progressRecords, postRecords, activeCycle] = await Promise.all([
+    getUserPersonalisedProfile(user.id, locale),
+    getUserProgrammeProgress(user.id),
+    getUserPostProgrammeProgress(user.id),
+    getUserActivePostProgrammeCycle(user.id),
+  ]);
+
   if (!personalisation.success || !personalisation.plan) {
     redirect(`/${locale}/no-access`);
   }
@@ -47,24 +54,33 @@ export default async function MemberDashboardPage({ params }: AppPageProps) {
   const plan = personalisation.plan;
   const labels = personalisation.labels!;
 
-  const progressRecords = await getUserProgrammeProgress(user.id);
-  const allRecords = await getUserAllProgressRecords(user.id);
-
+  // 4. Derive core progress calculation in memory
   const completedIds = progressRecords.map((r) => r.programme_session_id);
   const progressSummary = calculateProgrammeProgress(plan.programme, completedIds);
-  const guidance = getAdaptiveGuidance(allRecords, locale);
-
   const nextSession = progressSummary.nextSession;
   const isProgrammeComplete = progressSummary.isComplete;
 
-  // Active Post-Day-21 Cycle Recovery from post_programme_cycles table
-  const activeCycle = isProgrammeComplete
-    ? await getUserActivePostProgrammeCycle(user.id)
-    : null;
+  // 5. Build unified progress history in memory for Phase 7 adaptive guidance
+  const allRecords: ProgressRecordLike[] = [
+    ...progressRecords.map((r) => ({
+      programme_session_id: r.programme_session_id,
+      completed_at: r.completed_at,
+      difficulty: r.difficulty || null,
+      could_continue: r.could_continue || null,
+    })),
+    ...postRecords.map((r) => ({
+      programme_session_id: r.programme_session_id,
+      completed_at: r.completed_at,
+      difficulty: r.difficulty || null,
+      could_continue: r.could_continue || null,
+    })),
+  ];
+  allRecords.sort((a, b) => new Date(a.completed_at).getTime() - new Date(b.completed_at).getTime());
+  const guidance = getAdaptiveGuidance(allRecords, locale);
 
+  // 6. Active Post-Day-21 Cycle Recovery in memory
   let activePostSessionInfo = null;
-  if (activeCycle) {
-    const postRecords = await getUserPostProgrammeProgress(user.id);
+  if (isProgrammeComplete && activeCycle) {
     const cycleCompletions = postRecords.filter((r) => r.cycle_id === activeCycle.id);
     const completedPositions = new Set(cycleCompletions.map((r) => r.session_position));
     const nextPos = [1, 2, 3].find((p) => !completedPositions.has(p)) || 1;
