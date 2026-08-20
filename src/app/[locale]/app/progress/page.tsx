@@ -4,9 +4,9 @@ import { MemberNav } from '@/components/member/MemberNav';
 import { createSupabaseServerAppClient } from '@/lib/supabase/server';
 import { checkAndLinkUserEntitlement } from '@/lib/entitlement';
 import { getUserPersonalisedProfile } from '@/lib/personalisationServer';
-import { getUserProgrammeProgress } from '@/lib/progressServer';
+import { getUserProgrammeProgress, getUserPostProgrammeProgress } from '@/lib/progressServer';
 import { calculateProgrammeProgress, getSessionById } from '@/core/programmes/helpers';
-import { Activity, Clock, Calendar, CheckCircle2 } from 'lucide-react';
+import { Activity, Clock, Calendar, CheckCircle2, RefreshCw } from 'lucide-react';
 
 interface ProgressPageProps {
   params: Promise<{ locale: string }>;
@@ -37,10 +37,15 @@ export default async function ProgressPage({ params }: ProgressPageProps) {
 
   const plan = personalisation.plan;
   const progressRecords = await getUserProgrammeProgress(user.id);
+  const postRecords = await getUserPostProgrammeProgress(user.id);
+
   const completedIds = progressRecords.map((r) => r.programme_session_id);
   const completedDurations = progressRecords.map((r) => r.duration_minutes);
 
   const summary = calculateProgrammeProgress(plan.programme, completedIds, completedDurations);
+
+  const totalPostMinutes = postRecords.reduce((acc, r) => acc + r.duration_minutes, 0);
+  const combinedTotalWalkingMinutes = summary.totalDurationMinutes + totalPostMinutes;
 
   return (
     <div className="min-h-screen bg-zinc-950 text-zinc-50 flex flex-col justify-between selection:bg-brand-lime selection:text-zinc-950">
@@ -89,7 +94,7 @@ export default async function ProgressPage({ params }: ProgressPageProps) {
             </div>
             <div>
               <span className="text-3xl font-heading font-black text-brand-lime">
-                {summary.totalDurationMinutes} <span className="text-lg text-zinc-400 font-normal">min</span>
+                {combinedTotalWalkingMinutes} <span className="text-lg text-zinc-400 font-normal">min</span>
               </span>
               <span className="text-[10px] text-zinc-500 font-bold block mt-1">
                 {isPtBr ? 'Acumulado até agora' : 'Total minutes logged'}
@@ -136,10 +141,10 @@ export default async function ProgressPage({ params }: ProgressPageProps) {
           </p>
         </div>
 
-        {/* Session History Log */}
+        {/* 21-Day Session History Log */}
         <div className="w-full bg-zinc-900/40 border border-zinc-900 p-6 rounded-3xl flex flex-col gap-4">
           <h2 className="text-xs font-heading font-extrabold text-zinc-100 uppercase tracking-wide border-b border-zinc-900 pb-3">
-            {isPtBr ? 'HISTÓRICO DE SESSÕES REGISTRADAS' : 'SESSION HISTORY LOG'}
+            {isPtBr ? 'HISTÓRICO DE SESSÕES REGISTRADAS (21 DIAS)' : '21-DAY SESSION HISTORY LOG'}
           </h2>
 
           {progressRecords.length === 0 ? (
@@ -185,6 +190,58 @@ export default async function ProgressPage({ params }: ProgressPageProps) {
             </div>
           )}
         </div>
+
+        {/* AFTER DAY 21 ACTIVITY LOG */}
+        {postRecords.length > 0 && (
+          <div className="w-full bg-zinc-900/40 border border-zinc-900 p-6 rounded-3xl flex flex-col gap-4">
+            <h2 className="text-xs font-heading font-extrabold text-brand-lime uppercase tracking-wide border-b border-zinc-900 pb-3 flex items-center gap-2">
+              <RefreshCw className="w-4 h-4 text-brand-lime" />
+              {isPtBr ? 'ATIVIDADE APÓS OS 21 DIAS' : 'AFTER DAY 21 ACTIVITY'}
+            </h2>
+
+            <div className="flex flex-col gap-2.5">
+              {postRecords.map((record) => {
+                const sessionDef = getSessionById(record.programme_session_id);
+                const dateStr = new Date(record.completed_at).toLocaleDateString(locale, {
+                  day: '2-digit',
+                  month: 'short',
+                  year: 'numeric',
+                });
+
+                return (
+                  <div
+                    key={record.id}
+                    className="bg-zinc-950 border border-brand-lime/20 p-4 rounded-2xl flex flex-wrap items-center justify-between gap-3 text-xs"
+                  >
+                    <div className="flex items-center gap-3">
+                      <RefreshCw className="w-4 h-4 text-brand-lime shrink-0" />
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <h4 className="font-heading font-bold text-zinc-100">
+                            {sessionDef?.title || record.programme_session_id}
+                          </h4>
+                          <span className="text-[9px] font-heading font-extrabold uppercase bg-brand-lime/10 text-brand-lime px-2 py-0.5 rounded-full border border-brand-lime/30">
+                            {`${record.action_type.toUpperCase()} · CYCLE ${record.cycle_number}`}
+                          </span>
+                        </div>
+                        <span className="text-[10px] text-zinc-500">{dateStr}</span>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-4 text-xs font-heading font-bold">
+                      <span className="text-zinc-400">{record.duration_minutes} min</span>
+                      {record.difficulty && (
+                        <span className="text-[10px] bg-zinc-900 text-brand-lime px-2.5 py-1 rounded-full border border-zinc-800">
+                          {record.difficulty}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
       </main>
     </div>
   );

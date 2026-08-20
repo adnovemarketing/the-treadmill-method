@@ -4,8 +4,9 @@ import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { ProgrammeSession } from '@/core/programmes/library';
 import { EFFORT_SCALE } from '@/core/programmes/effortScale';
-import { Play, CheckCircle2, ArrowLeft, Clock, Heart, Sparkles, AlertTriangle } from 'lucide-react';
-import { recordSessionCompletionAction } from '@/app/[locale]/app/session/actions';
+import { Play, CheckCircle2, ArrowLeft, Clock, Heart, Sparkles, AlertTriangle, RefreshCw } from 'lucide-react';
+import { recordSessionCompletionAction, recordPostProgrammeCompletionAction } from '@/app/[locale]/app/session/actions';
+import { AdaptiveRecommendation } from '@/core/programmes/adaptive';
 
 interface SessionDetailClientProps {
   session: ProgrammeSession;
@@ -13,6 +14,13 @@ interface SessionDetailClientProps {
   profileId: string;
   isAlreadyCompleted: boolean;
   contextualNotice?: string | null;
+  postContext?: {
+    cycleId: string;
+    cycleNumber: number;
+    actionType: AdaptiveRecommendation;
+    sessionPosition: number;
+    durationMinutes: number;
+  } | null;
   locale: string;
 }
 
@@ -22,6 +30,7 @@ export function SessionDetailClient({
   profileId,
   isAlreadyCompleted,
   contextualNotice,
+  postContext,
   locale,
 }: SessionDetailClientProps) {
   const router = useRouter();
@@ -36,6 +45,8 @@ export function SessionDetailClient({
   const [note, setNote] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  const durationMinutes = postContext ? postContext.durationMinutes : session.durationMinutes;
+
   const handleStart = () => {
     setHasStarted(true);
   };
@@ -49,21 +60,43 @@ export function SessionDetailClient({
     setIsSubmitting(true);
 
     try {
-      const res = await recordSessionCompletionAction({
-        userId,
-        profileId,
-        sessionId: session.id,
-        difficulty,
-        couldContinue,
-        note: note.trim(),
-      });
+      if (postContext) {
+        const res = await recordPostProgrammeCompletionAction({
+          cycleId: postContext.cycleId,
+          sessionId: session.id,
+          difficulty,
+          couldContinue,
+          note: note.trim(),
+        });
 
-      if (res.success) {
-        setShowCheckInModal(false);
-        router.push(`/${locale}/app`);
-        router.refresh();
+        if (res.success) {
+          setShowCheckInModal(false);
+          if (res.isCycleCompleted || postContext.sessionPosition >= 3) {
+            router.push(`/${locale}/app/next`);
+          } else {
+            router.push(`/${locale}/app`);
+          }
+          router.refresh();
+        } else {
+          alert(res.error || 'Failed to complete session.');
+        }
       } else {
-        alert(res.error || 'Failed to complete session.');
+        const res = await recordSessionCompletionAction({
+          userId,
+          profileId,
+          sessionId: session.id,
+          difficulty,
+          couldContinue,
+          note: note.trim(),
+        });
+
+        if (res.success) {
+          setShowCheckInModal(false);
+          router.push(`/${locale}/app`);
+          router.refresh();
+        } else {
+          alert(res.error || 'Failed to complete session.');
+        }
       }
     } catch (err: unknown) {
       console.error(err);
@@ -87,14 +120,21 @@ export function SessionDetailClient({
       {/* Header Info */}
       <div className="bg-gradient-to-b from-zinc-900 to-zinc-950 border border-zinc-900 p-6 md:p-8 rounded-3xl flex flex-col gap-4 relative overflow-hidden">
         <div className="flex flex-wrap items-center justify-between gap-2 border-b border-zinc-800/80 pb-4">
-          <span className="text-[10px] tracking-widest text-brand-lime font-heading font-extrabold uppercase bg-brand-lime/10 px-3 py-1 rounded-full border border-brand-lime/30">
-            {isPtBr ? `SEMANA ${session.week} · TREINO ${session.sessionNumber}` : `WEEK ${session.week} · SESSION ${session.sessionNumber}`}
-          </span>
+          {postContext ? (
+            <span className="text-[10px] tracking-widest text-brand-lime font-heading font-extrabold uppercase bg-brand-lime/10 px-3 py-1 rounded-full border border-brand-lime/30 flex items-center gap-1.5">
+              <RefreshCw className="w-3 h-3 text-brand-lime" />
+              {`POST-DAY-21 · ${postContext.actionType.toUpperCase()} CYCLE ${postContext.cycleNumber} · SESSION ${postContext.sessionPosition}`}
+            </span>
+          ) : (
+            <span className="text-[10px] tracking-widest text-brand-lime font-heading font-extrabold uppercase bg-brand-lime/10 px-3 py-1 rounded-full border border-brand-lime/30">
+              {isPtBr ? `SEMANA ${session.week} · TREINO ${session.sessionNumber}` : `WEEK ${session.week} · SESSION ${session.sessionNumber}`}
+            </span>
+          )}
 
           <div className="flex items-center gap-3 text-xs font-heading font-bold text-zinc-300">
             <span className="flex items-center gap-1">
               <Clock className="w-3.5 h-3.5 text-brand-teal" />
-              {session.durationMinutes} min
+              {durationMinutes} min
             </span>
             <span className="text-brand-lime">Effort: {session.effort}</span>
           </div>

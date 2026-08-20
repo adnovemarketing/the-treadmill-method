@@ -5,9 +5,15 @@ import { MemberNav } from '@/components/member/MemberNav';
 import { createSupabaseServerAppClient } from '@/lib/supabase/server';
 import { checkAndLinkUserEntitlement } from '@/lib/entitlement';
 import { getUserPersonalisedProfile } from '@/lib/personalisationServer';
-import { getUserProgrammeProgress } from '@/lib/progressServer';
+import {
+  getUserProgrammeProgress,
+  getUserPostProgrammeProgress,
+  getUserActivePostProgrammeCycle,
+  getUserAllProgressRecords,
+} from '@/lib/progressServer';
 import { calculateProgrammeProgress } from '@/core/programmes/helpers';
 import { getAdaptiveGuidance } from '@/core/programmes/adaptive';
+import { getPostProgrammeCycleSessions } from '@/core/programmes/postProgramme';
 import { Trophy, Play, ArrowRight, Sparkles, Compass, Calendar, Target, Info, AlertTriangle } from 'lucide-react';
 
 interface AppPageProps {
@@ -42,12 +48,36 @@ export default async function MemberDashboardPage({ params }: AppPageProps) {
   const labels = personalisation.labels!;
 
   const progressRecords = await getUserProgrammeProgress(user.id);
+  const allRecords = await getUserAllProgressRecords(user.id);
+
   const completedIds = progressRecords.map((r) => r.programme_session_id);
   const progressSummary = calculateProgrammeProgress(plan.programme, completedIds);
-  const guidance = getAdaptiveGuidance(progressRecords, locale);
+  const guidance = getAdaptiveGuidance(allRecords, locale);
 
   const nextSession = progressSummary.nextSession;
   const isProgrammeComplete = progressSummary.isComplete;
+
+  // Active Post-Day-21 Cycle Recovery from post_programme_cycles table
+  const activeCycle = isProgrammeComplete
+    ? await getUserActivePostProgrammeCycle(user.id)
+    : null;
+
+  let activePostSessionInfo = null;
+  if (activeCycle) {
+    const postRecords = await getUserPostProgrammeProgress(user.id);
+    const cycleCompletions = postRecords.filter((r) => r.cycle_id === activeCycle.id);
+    const completedPositions = new Set(cycleCompletions.map((r) => r.session_position));
+    const nextPos = [1, 2, 3].find((p) => !completedPositions.has(p)) || 1;
+
+    const cycleSessions = getPostProgrammeCycleSessions(plan.programme, activeCycle.action_type);
+    const activeSessionItem = cycleSessions[nextPos - 1] || cycleSessions[0];
+
+    activePostSessionInfo = {
+      activeCycle,
+      nextPos,
+      activeSessionItem,
+    };
+  }
 
   return (
     <div className="min-h-screen bg-zinc-950 text-zinc-50 flex flex-col justify-between selection:bg-brand-lime selection:text-zinc-950">
@@ -59,31 +89,84 @@ export default async function MemberDashboardPage({ params }: AppPageProps) {
           <div className="absolute top-0 right-0 w-48 h-48 bg-brand-lime/10 rounded-full blur-3xl pointer-events-none" />
 
           {isProgrammeComplete ? (
-            <div className="flex flex-col items-center text-center gap-4 py-4">
-              <div className="w-16 h-16 rounded-full bg-brand-lime/10 border border-brand-lime/40 flex items-center justify-center text-brand-lime shadow-lg">
-                <Trophy className="w-8 h-8" />
+            activePostSessionInfo ? (
+              <div className="flex flex-col gap-5">
+                <div className="flex flex-wrap items-center justify-between gap-2 border-b border-zinc-800/80 pb-4">
+                  <div className="flex items-center gap-2">
+                    <span className="text-[10px] tracking-widest text-brand-lime font-heading font-extrabold uppercase bg-brand-lime/10 px-3 py-1 rounded-full border border-brand-lime/30">
+                      {`POST-DAY-21 · ${activePostSessionInfo.activeCycle.action_type.toUpperCase()} CYCLE ${activePostSessionInfo.activeCycle.cycle_number}`}
+                    </span>
+                    <span className="text-xs font-heading font-extrabold text-zinc-400 uppercase">
+                      {isPtBr
+                        ? `Treino ${activePostSessionInfo.nextPos} de 3`
+                        : `Session ${activePostSessionInfo.nextPos} of 3`}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-3 text-xs font-heading font-bold text-zinc-300">
+                    <span>⏱️ {activePostSessionInfo.activeSessionItem.plannedDurationMinutes} min</span>
+                    <span>⚡ Effort: {activePostSessionInfo.activeSessionItem.programmeSession.effort}</span>
+                  </div>
+                </div>
+
+                <div>
+                  <h1 className="text-2xl md:text-3xl font-heading font-black text-zinc-50 tracking-tight uppercase">
+                    {activePostSessionInfo.activeSessionItem.programmeSession.title}
+                  </h1>
+                  <p className="text-xs text-zinc-300 mt-2 leading-relaxed max-w-2xl">
+                    {activePostSessionInfo.activeSessionItem.programmeSession.summary}
+                  </p>
+                </div>
+
+                {guidance.contextualNotice && (
+                  <div className="bg-amber-500/10 border border-amber-500/30 p-3.5 rounded-2xl flex items-start gap-2.5 text-xs text-amber-200">
+                    <AlertTriangle className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
+                    <p className="leading-relaxed text-[11px] font-medium">{guidance.contextualNotice}</p>
+                  </div>
+                )}
+
+                <div className="flex flex-wrap items-center gap-4 pt-2">
+                  <Link
+                    href={`/${locale}/app/session/${activePostSessionInfo.activeSessionItem.programmeSession.id}?cycleId=${activePostSessionInfo.activeCycle.id}`}
+                    className="w-full sm:w-auto inline-flex items-center justify-center gap-2.5 bg-brand-lime text-zinc-950 hover:bg-brand-lime-hover font-heading font-bold text-sm tracking-wide px-8 py-4 rounded-2xl transition-all shadow-lg shadow-lime-500/10 cursor-pointer"
+                  >
+                    <Play className="w-4 h-4 fill-current" />
+                    <span>{isPtBr ? 'INICIAR CAMINHADA' : 'START WALK'}</span>
+                  </Link>
+                  <Link
+                    href={`/${locale}/app/next`}
+                    className="text-xs font-heading font-bold text-zinc-400 hover:text-zinc-200 transition-colors px-2 py-1"
+                  >
+                    {isPtBr ? 'Ver Próximos Passos' : 'See What Comes Next'}
+                  </Link>
+                </div>
               </div>
-              <div className="flex flex-col gap-1">
-                <span className="text-[10px] tracking-widest text-brand-lime font-heading font-extrabold uppercase bg-brand-lime/10 px-3 py-1 rounded-full w-fit mx-auto">
-                  {isPtBr ? 'CONCLUÍDO' : 'INITIAL PROGRAMME COMPLETE'}
-                </span>
-                <h1 className="text-2xl md:text-3xl font-heading font-black text-zinc-50 uppercase tracking-tight mt-2">
-                  {isPtBr ? 'Você completou os 9 Treinos Principais!' : 'You Completed All 9 Core Sessions!'}
-                </h1>
-                <p className="text-xs text-zinc-400 max-w-md mx-auto mt-1">
-                  {isPtBr
-                    ? 'Parabéns! Sua rotina inicial de 21 dias foi concluída com sucesso. Veja como prosseguir.'
-                    : 'Congratulations! Your initial 21-Day foundation is complete. Learn how to maintain or progress your routine.'}
-                </p>
+            ) : (
+              <div className="flex flex-col items-center text-center gap-4 py-4">
+                <div className="w-16 h-16 rounded-full bg-brand-lime/10 border border-brand-lime/40 flex items-center justify-center text-brand-lime shadow-lg">
+                  <Trophy className="w-8 h-8" />
+                </div>
+                <div className="flex flex-col gap-1">
+                  <span className="text-[10px] tracking-widest text-brand-lime font-heading font-extrabold uppercase bg-brand-lime/10 px-3 py-1 rounded-full w-fit mx-auto">
+                    {isPtBr ? 'CONCLUÍDO' : 'INITIAL PROGRAMME COMPLETE'}
+                  </span>
+                  <h1 className="text-2xl md:text-3xl font-heading font-black text-zinc-50 uppercase tracking-tight mt-2">
+                    {isPtBr ? 'Você completou os 9 Treinos Principais!' : 'You Completed All 9 Core Sessions!'}
+                  </h1>
+                  <p className="text-xs text-zinc-400 max-w-md mx-auto mt-1">
+                    {isPtBr
+                      ? 'Parabéns! Sua rotina inicial de 21 dias foi concluída com sucesso. Veja como prosseguir.'
+                      : 'Congratulations! Your initial 21-Day foundation is complete. Learn how to maintain or progress your routine.'}
+                  </p>
+                </div>
+                <Link
+                  href={`/${locale}/app/next`}
+                  className="mt-2 inline-flex items-center gap-2 bg-brand-lime text-zinc-950 hover:bg-brand-lime-hover font-heading font-bold text-sm tracking-wide px-8 py-4 rounded-2xl transition-all shadow-lg"
+                >
+                  <span>{isPtBr ? 'Ver Próximos Passos' : 'See What Comes Next'}</span>
+                  <ArrowRight className="w-4 h-4" />
+                </Link>
               </div>
-              <Link
-                href={`/${locale}/app/next`}
-                className="mt-2 inline-flex items-center gap-2 bg-brand-lime text-zinc-950 hover:bg-brand-lime-hover font-heading font-bold text-sm tracking-wide px-8 py-4 rounded-2xl transition-all shadow-lg"
-              >
-                <span>{isPtBr ? 'Ver Próximos Passos' : 'See What Comes Next'}</span>
-                <ArrowRight className="w-4 h-4" />
-              </Link>
-            </div>
+            )
           ) : nextSession ? (
             <div className="flex flex-col gap-5">
               <div className="flex flex-wrap items-center justify-between gap-2 border-b border-zinc-800/80 pb-4">

@@ -3,8 +3,9 @@ import { redirect } from 'next/navigation';
 import { MemberNav } from '@/components/member/MemberNav';
 import { createSupabaseServerAppClient } from '@/lib/supabase/server';
 import { checkAndLinkUserEntitlement } from '@/lib/entitlement';
-import { getUserProgrammeProgress } from '@/lib/progressServer';
+import { getUserAllProgressRecords } from '@/lib/progressServer';
 import { getAdaptiveGuidance } from '@/core/programmes/adaptive';
+import { AfterDay21Cta } from '@/components/member/AfterDay21Cta';
 import { RefreshCw, TrendingUp, ShieldCheck, Trophy, Sparkles } from 'lucide-react';
 
 interface NextPageProps {
@@ -29,8 +30,8 @@ export default async function AfterDay21Page({ params }: NextPageProps) {
     redirect(`/${locale}/no-access`);
   }
 
-  const progressRecords = await getUserProgrammeProgress(user.id);
-  const guidance = getAdaptiveGuidance(progressRecords, locale);
+  const allRecords = await getUserAllProgressRecords(user.id);
+  const guidance = getAdaptiveGuidance(allRecords, locale);
 
   return (
     <div className="min-h-screen bg-zinc-950 text-zinc-50 flex flex-col justify-between selection:bg-brand-lime selection:text-zinc-950">
@@ -66,6 +67,11 @@ export default async function AfterDay21Page({ params }: NextPageProps) {
           <p className="text-xs text-zinc-300 leading-relaxed max-w-xl">
             {guidance.reason}
           </p>
+
+          <AfterDay21Cta
+            recommendation={guidance.recommendation}
+            locale={locale}
+          />
         </div>
 
         {/* 1. REPEAT */}
