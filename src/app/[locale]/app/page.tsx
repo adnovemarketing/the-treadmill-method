@@ -7,7 +7,8 @@ import { checkAndLinkUserEntitlement } from '@/lib/entitlement';
 import { getUserPersonalisedProfile } from '@/lib/personalisationServer';
 import { getUserProgrammeProgress } from '@/lib/progressServer';
 import { calculateProgrammeProgress } from '@/core/programmes/helpers';
-import { Trophy, Play, ArrowRight, Sparkles, Compass, Calendar, Target, Info } from 'lucide-react';
+import { getAdaptiveGuidance } from '@/core/programmes/adaptive';
+import { Trophy, Play, ArrowRight, Sparkles, Compass, Calendar, Target, Info, AlertTriangle } from 'lucide-react';
 
 interface AppPageProps {
   params: Promise<{ locale: string }>;
@@ -43,6 +44,7 @@ export default async function MemberDashboardPage({ params }: AppPageProps) {
   const progressRecords = await getUserProgrammeProgress(user.id);
   const completedIds = progressRecords.map((r) => r.programme_session_id);
   const progressSummary = calculateProgrammeProgress(plan.programme, completedIds);
+  const guidance = getAdaptiveGuidance(progressRecords, locale);
 
   const nextSession = progressSummary.nextSession;
   const isProgrammeComplete = progressSummary.isComplete;
@@ -107,6 +109,13 @@ export default async function MemberDashboardPage({ params }: AppPageProps) {
                   {nextSession.summary}
                 </p>
               </div>
+
+              {guidance.contextualNotice && (
+                <div className="bg-amber-500/10 border border-amber-500/30 p-3.5 rounded-2xl flex items-start gap-2.5 text-xs text-amber-200">
+                  <AlertTriangle className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
+                  <p className="leading-relaxed text-[11px] font-medium">{guidance.contextualNotice}</p>
+                </div>
+              )}
 
               <div className="flex flex-wrap items-center gap-4 pt-2">
                 <Link

@@ -6,6 +6,7 @@ import { checkAndLinkUserEntitlement } from '@/lib/entitlement';
 import { getUserPersonalisedProfile } from '@/lib/personalisationServer';
 import { getUserProgrammeProgress } from '@/lib/progressServer';
 import { getSessionById, isSessionInProgramme } from '@/core/programmes/helpers';
+import { getAdaptiveGuidance } from '@/core/programmes/adaptive';
 import { SessionDetailClient } from '@/components/member/SessionDetailClient';
 
 interface SessionPageProps {
@@ -53,6 +54,8 @@ export default async function SessionDetailPage({ params }: SessionPageProps) {
   // 3. Check if session is already completed by user
   const progressRecords = await getUserProgrammeProgress(user.id);
   const isAlreadyCompleted = progressRecords.some((r) => r.programme_session_id === sessionId);
+  const guidance = getAdaptiveGuidance(progressRecords, locale);
+  const contextualNotice = isAlreadyCompleted ? null : guidance.contextualNotice;
 
   return (
     <div className="min-h-screen bg-zinc-950 text-zinc-50 flex flex-col justify-between selection:bg-brand-lime selection:text-zinc-950">
@@ -64,6 +67,7 @@ export default async function SessionDetailPage({ params }: SessionPageProps) {
           userId={user.id}
           profileId={profileId}
           isAlreadyCompleted={isAlreadyCompleted}
+          contextualNotice={contextualNotice}
           locale={locale}
         />
       </main>

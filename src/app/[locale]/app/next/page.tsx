@@ -3,7 +3,9 @@ import { redirect } from 'next/navigation';
 import { MemberNav } from '@/components/member/MemberNav';
 import { createSupabaseServerAppClient } from '@/lib/supabase/server';
 import { checkAndLinkUserEntitlement } from '@/lib/entitlement';
-import { RefreshCw, TrendingUp, ShieldCheck, Trophy } from 'lucide-react';
+import { getUserProgrammeProgress } from '@/lib/progressServer';
+import { getAdaptiveGuidance } from '@/core/programmes/adaptive';
+import { RefreshCw, TrendingUp, ShieldCheck, Trophy, Sparkles } from 'lucide-react';
 
 interface NextPageProps {
   params: Promise<{ locale: string }>;
@@ -27,6 +29,9 @@ export default async function AfterDay21Page({ params }: NextPageProps) {
     redirect(`/${locale}/no-access`);
   }
 
+  const progressRecords = await getUserProgrammeProgress(user.id);
+  const guidance = getAdaptiveGuidance(progressRecords, locale);
+
   return (
     <div className="min-h-screen bg-zinc-950 text-zinc-50 flex flex-col justify-between selection:bg-brand-lime selection:text-zinc-950">
       <MemberNav locale={locale} />
@@ -43,6 +48,23 @@ export default async function AfterDay21Page({ params }: NextPageProps) {
             {isPtBr
               ? 'Diretrizes para dar continuidade à sua rotina de caminhada além dos 21 dias iniciais.'
               : 'Principles for continuing your routine and protecting your habit beyond the initial 21 days.'}
+          </p>
+        </div>
+
+        {/* PERSONALISED RECOMMENDATION TOP BANNER */}
+        <div className="bg-gradient-to-b from-zinc-900 to-zinc-950 border border-brand-lime/40 p-6 md:p-8 rounded-3xl flex flex-col gap-3 shadow-xl relative overflow-hidden">
+          <div className="absolute top-0 right-0 w-32 h-32 bg-brand-lime/10 rounded-full blur-2xl pointer-events-none" />
+          <div className="flex items-center gap-2">
+            <Sparkles className="w-4 h-4 text-brand-lime shrink-0" />
+            <span className="text-[10px] tracking-widest text-brand-lime font-heading font-extrabold uppercase">
+              {isPtBr ? 'SEU PRÓXIMO PASSO RECOMENDADO' : 'YOUR RECOMMENDED NEXT STEP'}
+            </span>
+          </div>
+          <h2 className="text-xl md:text-2xl font-heading font-black text-zinc-50 uppercase tracking-tight">
+            {guidance.recommendationTitle}
+          </h2>
+          <p className="text-xs text-zinc-300 leading-relaxed max-w-xl">
+            {guidance.reason}
           </p>
         </div>
 

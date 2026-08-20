@@ -4,7 +4,7 @@ import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { ProgrammeSession } from '@/core/programmes/library';
 import { EFFORT_SCALE } from '@/core/programmes/effortScale';
-import { Play, CheckCircle2, ArrowLeft, Clock, Heart, Sparkles } from 'lucide-react';
+import { Play, CheckCircle2, ArrowLeft, Clock, Heart, Sparkles, AlertTriangle } from 'lucide-react';
 import { recordSessionCompletionAction } from '@/app/[locale]/app/session/actions';
 
 interface SessionDetailClientProps {
@@ -12,6 +12,7 @@ interface SessionDetailClientProps {
   userId: string;
   profileId: string;
   isAlreadyCompleted: boolean;
+  contextualNotice?: string | null;
   locale: string;
 }
 
@@ -20,6 +21,7 @@ export function SessionDetailClient({
   userId,
   profileId,
   isAlreadyCompleted,
+  contextualNotice,
   locale,
 }: SessionDetailClientProps) {
   const router = useRouter();
@@ -106,6 +108,13 @@ export function SessionDetailClient({
             {session.summary}
           </p>
         </div>
+
+        {!isAlreadyCompleted && contextualNotice && (
+          <div className="bg-amber-500/10 border border-amber-500/30 p-3.5 rounded-2xl flex items-start gap-2.5 text-xs text-amber-200">
+            <AlertTriangle className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
+            <p className="leading-relaxed text-[11px] font-medium">{contextualNotice}</p>
+          </div>
+        )}
 
         {/* CTA Controls */}
         <div className="pt-2">
