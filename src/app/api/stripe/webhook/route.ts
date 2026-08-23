@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getStripeServerClient } from '@/lib/stripeServer';
 import { getSupabaseServerClient } from '@/lib/supabaseServer';
+import { sendMetaCAPIPurchase } from '@/lib/metaConversionsServer';
 import Stripe from 'stripe';
 
 export async function POST(request: NextRequest) {
@@ -114,6 +115,26 @@ export async function POST(request: NextRequest) {
       console.log(
         `[Stripe Webhook Success]: Purchase recorded for profile ${profileId}, session ${session.id}.`
       );
+
+      // Trigger server-side Meta CAPI Purchase event for confirmed paid sessions
+      if (isPaid) {
+        const customerEmail =
+          session.customer_details?.email ||
+          session.customer_email ||
+          (typeof session.customer === 'object' &&
+          session.customer &&
+          'email' in session.customer
+            ? (session.customer as { email?: string }).email
+            : null) ||
+          null;
+
+        await sendMetaCAPIPurchase({
+          sessionId: session.id,
+          amountTotal: session.amount_total,
+          currency: session.currency,
+          email: customerEmail,
+        });
+      }
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : 'Unknown error';
       console.error('[Stripe Webhook Exception]:', msg);
