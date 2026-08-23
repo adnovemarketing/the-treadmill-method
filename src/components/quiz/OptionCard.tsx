@@ -34,7 +34,7 @@ export function OptionCard({
       whileTap={{ scale: 0.98 }}
       className={cn(
         "w-full text-left rounded-2xl border bg-zinc-900/60 backdrop-blur-sm select-none transition-all cursor-pointer flex min-w-0",
-        image ? "flex-col items-stretch p-0 overflow-hidden" : "items-center justify-between p-5 gap-4",
+        image ? "flex-col items-stretch p-0 overflow-hidden" : "items-center justify-between p-4 sm:p-4.5 gap-3.5",
         selected
           ? "border-brand-lime bg-zinc-900 shadow-lg shadow-lime-500/10"
           : "border-zinc-800/80 hover:border-zinc-700 hover:bg-zinc-900/30"
@@ -46,13 +46,13 @@ export function OptionCard({
         </div>
       )}
 
-      <div className={cn("flex items-center justify-between gap-4 flex-1 min-w-0", image ? "p-4 md:p-5" : "")}>
-        <div className="flex items-center gap-3.5 flex-1 min-w-0">
+      <div className={cn("flex items-center justify-between gap-3.5 flex-1 min-w-0", image ? "p-4 md:p-5" : "")}>
+        <div className="flex items-center gap-3 flex-1 min-w-0">
           {/* Ícone ou Emoji */}
           {icon && (
             <div
               className={cn(
-                "w-10 h-10 rounded-xl flex items-center justify-center transition-colors shrink-0",
+                "w-9 h-9 sm:w-10 sm:h-10 rounded-xl flex items-center justify-center transition-colors shrink-0",
                 selected
                   ? "bg-brand-lime/10 text-brand-lime"
                   : "bg-zinc-950 text-zinc-400"
@@ -63,7 +63,7 @@ export function OptionCard({
           )}
 
           {emoji && (
-            <div className="text-xl w-10 h-10 flex items-center justify-center bg-zinc-950 rounded-xl select-none shrink-0 border border-zinc-900">
+            <div className="text-lg sm:text-xl w-9 h-9 sm:w-10 sm:h-10 flex items-center justify-center bg-zinc-950 rounded-xl select-none shrink-0 border border-zinc-900">
               {emoji}
             </div>
           )}
@@ -72,14 +72,14 @@ export function OptionCard({
           <div className="flex-1 min-w-0">
             <h3
               className={cn(
-                "text-sm font-semibold transition-colors leading-snug truncate-none whitespace-normal break-words",
+                "text-[13px] sm:text-sm font-semibold transition-colors leading-snug whitespace-normal break-words",
                 selected ? "text-brand-lime" : "text-zinc-100"
               )}
             >
               {title}
             </h3>
             {description && (
-              <p className="text-xs text-zinc-400 mt-1 font-medium leading-relaxed break-words">
+              <p className="text-[11px] sm:text-xs text-zinc-400 mt-0.5 font-medium leading-normal break-words">
                 {description}
               </p>
             )}

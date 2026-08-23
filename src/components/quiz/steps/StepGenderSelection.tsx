@@ -28,7 +28,7 @@ export function StepGenderSelection({ onNext }: StepProps) {
           src={VISUAL_ASSETS.demographics.genderFemale}
           alt={t.quiz.steps.genderSelection.female.label}
           fill
-          sizes="(max-width: 768px) 100vw, 33vw"
+          sizes="(max-width: 768px) 100vw, 50vw"
           className="object-contain object-bottom"
         />
       ),
@@ -42,21 +42,7 @@ export function StepGenderSelection({ onNext }: StepProps) {
           src={VISUAL_ASSETS.demographics.genderMale}
           alt={t.quiz.steps.genderSelection.male.label}
           fill
-          sizes="(max-width: 768px) 100vw, 33vw"
-          className="object-contain object-bottom"
-        />
-      ),
-    },
-    {
-      value: "other",
-      title: t.quiz.steps.genderSelection.other.label,
-      description: t.quiz.steps.genderSelection.other.desc,
-      image: (
-        <Image
-          src={VISUAL_ASSETS.lifestyle.bodyTypesDiverse}
-          alt={t.quiz.steps.genderSelection.other.label}
-          fill
-          sizes="(max-width: 768px) 100vw, 33vw"
+          sizes="(max-width: 768px) 100vw, 50vw"
           className="object-contain object-bottom"
         />
       ),
@@ -82,8 +68,8 @@ export function StepGenderSelection({ onNext }: StepProps) {
         </p>
       </div>
 
-      {/* Grid horizontal no desktop para Layout C */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-2">
+      {/* Grid horizontal no desktop para 2 opções centralizadas */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-2 max-w-2xl mx-auto w-full">
         {options.map((opt) => (
           <OptionCard
             key={opt.value}

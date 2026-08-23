@@ -19,33 +19,29 @@ export function StepCardioLevel({ onNext }: StepProps) {
   const locale = useLocale();
   const t = useTranslations(locale);
 
-  const options: { value: CardioFitnessLevel; title: string; description: string; emoji: string; icon: React.ReactNode }[] = [
+  const options: { value: CardioFitnessLevel; title: string; description: string; icon: React.ReactNode }[] = [
     {
       value: "beginner",
       title: t.quiz.steps.cardioLevel.beginner.label,
       description: t.quiz.steps.cardioLevel.beginner.desc,
-      emoji: "🧘",
       icon: <Activity className="w-4 h-4 text-brand-teal" />
     },
     {
       value: "intermediate",
       title: t.quiz.steps.cardioLevel.intermediate.label,
       description: t.quiz.steps.cardioLevel.intermediate.desc,
-      emoji: "🏃",
       icon: <Gauge className="w-4 h-4 text-brand-lime" />
     },
     {
       value: "advanced",
       title: t.quiz.steps.cardioLevel.advanced.label,
       description: t.quiz.steps.cardioLevel.advanced.desc,
-      emoji: "⚡",
       icon: <Flame className="w-4 h-4 text-brand-lime" />
     },
     {
       value: "poor_fitness",
       title: t.quiz.steps.cardioLevel.poor.label,
       description: t.quiz.steps.cardioLevel.poor.desc,
-      emoji: "🥵",
       icon: <Heart className="w-4 h-4 text-red-500" />
     },
   ];
@@ -78,7 +74,6 @@ export function StepCardioLevel({ onNext }: StepProps) {
               key={opt.value}
               title={opt.title}
               description={opt.description}
-              emoji={opt.emoji}
               icon={opt.icon}
               selected={data.cardioFitnessLevel === opt.value}
               onClick={() => handleSelect(opt.value)}

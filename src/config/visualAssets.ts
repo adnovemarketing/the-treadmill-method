@@ -1,11 +1,11 @@
 // Manifesto centralizado e tipado para os assets estáticos do Quiz
 export const VISUAL_ASSETS = {
   demographics: {
-    age18To24: "/assets/characters/sarah/after/sarah-after.png",
-    age30_39: "/assets/characters/emma/after/emma-after.png",
-    age40_49: "/assets/characters/emma/after/emma-after.png",
-    age50_59: "/assets/characters/denise/after/denise-after.png",
-    age60_plus: "/assets/characters/denise/after/denise-after.png",
+  age18To24: "/assets/characters/age-groups/age-18-24.png",
+  age30_39: "/assets/characters/age-groups/age-25-34.png",
+  age40_49: "/assets/characters/emma/after/emma-after.png",
+  age50_59: "/assets/characters/denise/after/denise-after.png",
+  age60_plus: "/assets/characters/denise/after/denise-after.png",
     genderFemale: "/assets/characters/sarah/after/sarah-after.png",
     genderMale: "/assets/characters/david/after/david-after.png",
   },
