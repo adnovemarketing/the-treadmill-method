@@ -1,5 +1,4 @@
 import React from "react";
-import { LanguageSwitcher } from "./LanguageSwitcher";
 
 export function Header() {
   return (
@@ -9,7 +8,6 @@ export function Header() {
           THE <span className="text-brand-lime">TREADMILL</span> METHOD
         </span>
       </div>
-      <LanguageSwitcher />
     </header>
   );
 }

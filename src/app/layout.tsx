@@ -27,10 +27,8 @@ interface RootLayoutProps {
 
 export default async function RootLayout({
   children,
-  params,
 }: RootLayoutProps) {
-  const { locale } = await params;
-  const lang = locale === "pt-br" ? "pt-BR" : "en-GB";
+  const lang = "en-GB";
 
   return (
     <html

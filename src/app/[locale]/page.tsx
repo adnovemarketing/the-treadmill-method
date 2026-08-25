@@ -6,7 +6,6 @@ import { useRouter, useParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { useTranslations } from "@/core/i18n/translations";
 import { ArrowRight, Flame, Shield, Star, Trophy, Zap } from "lucide-react";
-import { LanguageSwitcher } from "@/components/common/LanguageSwitcher";
 import { CRO_FLAGS } from "@/config/flags";
 import { trackEvent } from "@/core/utils/analytics";
 import { useEffect } from "react";
@@ -36,7 +35,6 @@ export default function HomePage() {
           </span>
         </div>
         <div className="flex items-center gap-4">
-          <LanguageSwitcher />
           <Button
             onClick={handleStartQuiz}
             variant="outline"

@@ -3,13 +3,22 @@ import type { NextRequest } from 'next/server';
 
 import { createServerClient } from '@supabase/ssr';
 
-const locales = ['en-gb', 'pt-br'];
+const locales = ['en-gb'];
 const defaultLocale = 'en-gb';
 
 export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
-  // 1. Verificar se a URL já possui localidade válida
+  // 1. Permanent redirect for legacy /pt-br URLs to /en-gb equivalent
+  if (pathname.startsWith('/pt-br/') || pathname === '/pt-br') {
+    const url = request.nextUrl.clone();
+    url.pathname = pathname.replace(/^\/pt-br(\/|$)/, '/en-gb$1');
+    const response = NextResponse.redirect(url, 308);
+    response.cookies.set('locale', defaultLocale, { maxAge: 365 * 24 * 60 * 60, path: '/' });
+    return response;
+  }
+
+  // 2. Verificar se a URL já possui localidade válida
   const pathnameHasLocale = locales.some(
     (locale) => pathname.startsWith(`/${locale}/`) || pathname === `/${locale}`
   );

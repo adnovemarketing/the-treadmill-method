@@ -306,7 +306,7 @@ export interface TranslationSchema {
   };
 }
 
-export const translations: Record<Locale, TranslationSchema> = {
+export const translations: Record<Locale | 'pt-br', TranslationSchema> = {
   'en-gb': {
     metadata: {
       home: {

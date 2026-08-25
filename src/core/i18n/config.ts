@@ -14,7 +14,7 @@ export interface MarketConfig {
   heightUnitDefault: 'cm' | 'ft';
 }
 
-export const locales = ['en-gb', 'pt-br'] as const;
+export const locales = ['en-gb'] as const;
 export type Locale = typeof locales[number];
 export const defaultLocale: Locale = 'en-gb';
 
@@ -31,21 +31,6 @@ export const marketConfigs: Record<Locale, MarketConfig> = {
       single: 9.90,
     },
     dateFormat: 'en-GB',
-    weightUnitDefault: 'kg',
-    heightUnitDefault: 'cm',
-  },
-  'pt-br': {
-    locale: 'pt-BR',
-    currency: 'BRL',
-    currencySymbol: 'R$',
-    prices: {
-      monthly: 47.90,
-      monthlyOriginal: 197.00,
-      quarterly: 97.00,
-      quarterlyOriginal: 397.00,
-      single: 9.90,
-    },
-    dateFormat: 'pt-BR',
     weightUnitDefault: 'kg',
     heightUnitDefault: 'cm',
   },

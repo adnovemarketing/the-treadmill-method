@@ -3,7 +3,6 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { LanguageSwitcher } from '../common/LanguageSwitcher';
 import {
   Home,
   FileText,
@@ -72,10 +71,8 @@ export function MemberNav({ locale }: MemberNavProps) {
           })}
         </nav>
 
-        {/* Right side: Language Switcher & Mobile Menu Button */}
+        {/* Right side: Mobile Menu Button */}
         <div className="flex items-center gap-2">
-          <LanguageSwitcher />
-
           <button
             onClick={() => setIsOpen(!isOpen)}
             className="lg:hidden p-2 rounded-xl border border-zinc-800 bg-zinc-900/60 text-zinc-200 hover:bg-zinc-900 transition-colors"
