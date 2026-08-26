@@ -85,24 +85,20 @@ export async function POST(request: NextRequest) {
     const supabase = getSupabaseServerClient();
 
     if (event_type === 'step_viewed') {
-      // Use ON CONFLICT DO NOTHING (ignore duplicate step views for the same session)
-      const { error: insertError } = await supabase
-        .from('quiz_step_events')
-        .upsert(
-          {
-            session_id,
-            event_type: 'step_viewed',
-            step_slug: validatedStepSlug,
-            step_number: validatedStepNumber,
-            payload: validatedPayload,
-          },
-          {
-            onConflict: 'session_id,step_slug',
-            ignoreDuplicates: true,
-          }
-        );
+      const { error: insertError } = await supabase.from('quiz_step_events').insert({
+        session_id,
+        event_type: 'step_viewed',
+        step_slug: validatedStepSlug,
+        step_number: validatedStepNumber,
+        payload: validatedPayload,
+      });
 
       if (insertError) {
+        // PostgREST/PostgreSQL code 23505 = unique_violation (duplicate step_viewed for same session)
+        if (insertError.code === '23505') {
+          return NextResponse.json({ success: true }, { status: 200 });
+        }
+
         console.error('[Analytics Event Insert Error]:', insertError.message);
         return NextResponse.json({ success: false, error: 'Database insert failed' }, { status: 500 });
       }
