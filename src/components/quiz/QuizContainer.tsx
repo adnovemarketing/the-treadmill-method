@@ -126,18 +126,21 @@ export function QuizContainer() {
     if (prevStepRef.current && prevStepRef.current !== currentStep) {
       const state = useQuizStore.getState().data;
       const answeredValue = getAnsweredValueForStep(prevStepRef.current, state);
-      trackEvent("question_answered", {
-        step: prevStepRef.current,
-        answer: answeredValue,
-        locale,
-      });
 
-      sendQuizAnalyticsEvent({
-        sessionId,
-        eventType: "question_answered",
-        stepSlug: prevStepRef.current,
-        payload: { answer: answeredValue },
-      });
+      if (answeredValue !== null && answeredValue !== undefined) {
+        trackEvent("question_answered", {
+          step: prevStepRef.current,
+          answer: answeredValue,
+          locale,
+        });
+
+        sendQuizAnalyticsEvent({
+          sessionId,
+          eventType: "question_answered",
+          stepSlug: prevStepRef.current,
+          payload: { answer: answeredValue },
+        });
+      }
     }
 
     prevStepRef.current = currentStep;

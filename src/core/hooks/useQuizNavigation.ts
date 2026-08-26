@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { useRouter, useSearchParams, usePathname } from "next/navigation";
 import { useQuizStore } from "../store/quizStore";
 import { QuizStep } from "../types/quiz";
@@ -9,6 +9,7 @@ export function useQuizNavigation() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const pathname = usePathname();
+  const isNavigatingRef = useRef(false);
 
   const {
     currentStep,
@@ -24,6 +25,13 @@ export function useQuizNavigation() {
   useEffect(() => {
     const urlStep = searchParams.get("step") as QuizStep | null;
 
+    if (isNavigatingRef.current) {
+      if (urlStep === currentStep) {
+        isNavigatingRef.current = false;
+      }
+      return;
+    }
+
     if (urlStep && urlStep !== currentStep) {
       // Se a URL mudou (por exemplo, botão Voltar do próprio navegador)
       setStep(urlStep);
@@ -37,6 +45,7 @@ export function useQuizNavigation() {
 
   // Função para transicionar empurrando o parâmetro na URL
   const navigateTo = (step: QuizStep) => {
+    isNavigatingRef.current = true;
     goToStep(step);
     const params = new URLSearchParams(searchParams.toString());
     params.set("step", step);
@@ -45,6 +54,7 @@ export function useQuizNavigation() {
 
   const navigateBack = () => {
     if (history.length === 0) return;
+    isNavigatingRef.current = true;
     goBack();
     // Pega o estado atualizado do Zustand após o pop
     const prevStep = useQuizStore.getState().currentStep;
@@ -55,6 +65,7 @@ export function useQuizNavigation() {
 
   const navigateForward = () => {
     if (futureSteps.length === 0) return;
+    isNavigatingRef.current = true;
     goForward();
     const nextStep = useQuizStore.getState().currentStep;
     const params = new URLSearchParams(searchParams.toString());
