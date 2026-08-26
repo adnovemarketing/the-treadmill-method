@@ -10,7 +10,7 @@ import { Mail, Shield, Check, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useRouter } from "next/navigation";
 import { VISUAL_ASSETS } from "@/config/visualAssets";
-import { trackEvent } from "@/core/utils/analytics";
+import { trackEvent, sendQuizAnalyticsEvent } from "@/core/utils/analytics";
 import { CRO_FLAGS } from "@/config/flags";
 import { QuizProfileApiResponse } from "@/core/types/quiz";
 
@@ -48,10 +48,13 @@ export function StepEmailCapture() {
     submittingRef.current = true;
 
     try {
-      const currentStoreData = useQuizStore.getState().data;
+      const storeState = useQuizStore.getState();
+      const sessionId = storeState.getOrCreateSessionId();
+      const currentStoreData = storeState.data;
       const fullQuizPayload = {
         ...currentStoreData,
         email: normalizedEmail,
+        sessionId,
       };
 
       const response = await fetch("/api/quiz/profile", {
@@ -61,6 +64,7 @@ export function StepEmailCapture() {
         },
         body: JSON.stringify({
           email: normalizedEmail,
+          session_id: sessionId,
           quizData: fullQuizPayload,
         }),
       });
@@ -80,14 +84,24 @@ export function StepEmailCapture() {
       updateData({
         email: normalizedEmail,
         profileId: result.profile_id,
+        sessionId,
       });
 
-      // Envia evento de Analytics
+      // Envia evento de Meta Analytics
       trackEvent("lead_submitted", {
         email: normalizedEmail,
         consent,
         locale,
         profileId: result.profile_id,
+      });
+
+      // Envia evento de Supabase Funnel Analytics
+      sendQuizAnalyticsEvent({
+        sessionId,
+        eventType: "lead_submitted",
+        stepSlug: "email-capture",
+        stepNumber: 18,
+        payload: { profileId: result.profile_id, locale },
       });
 
       // Redireciona o usuário para o Relatório Personalizado (/report)

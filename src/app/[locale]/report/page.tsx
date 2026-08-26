@@ -18,7 +18,7 @@ import {
   AlertTriangle,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { trackEvent } from "@/core/utils/analytics";
+import { trackEvent, sendQuizAnalyticsEvent } from "@/core/utils/analytics";
 import { CRO_FLAGS } from "@/config/flags";
 
 export default function ReportPage() {
@@ -153,6 +153,14 @@ export default function ReportPage() {
           <button
             onClick={() => {
               trackEvent("checkout_clicked", { source: "report_top_anchor", locale });
+              const sessionId = useQuizStore.getState().sessionId;
+              if (sessionId) {
+                sendQuizAnalyticsEvent({
+                  sessionId,
+                  eventType: "offer_cta_clicked",
+                  payload: { source: "report_top_anchor", locale },
+                });
+              }
               router.push(`/${locale}/checkout`);
             }}
             className="w-full border border-brand-lime/30 text-brand-lime hover:bg-brand-lime/10 font-heading font-bold text-xs tracking-wide py-3 px-4 rounded-xl transition-all cursor-pointer flex items-center justify-center gap-2"
@@ -380,6 +388,14 @@ export default function ReportPage() {
           <Button
             onClick={() => {
               trackEvent("checkout_clicked", { source: "report_bottom_cta", locale });
+              const sessionId = useQuizStore.getState().sessionId;
+              if (sessionId) {
+                sendQuizAnalyticsEvent({
+                  sessionId,
+                  eventType: "offer_cta_clicked",
+                  payload: { source: "report_bottom_cta", locale },
+                });
+              }
               router.push(`/${locale}/checkout`);
             }}
             className="w-full bg-brand-lime text-zinc-950 hover:bg-brand-lime-hover font-heading font-bold text-sm tracking-wide py-6 rounded-2xl transition-all cursor-pointer flex items-center justify-center gap-2"

@@ -54,6 +54,7 @@ export interface QuizData {
   readyToChange: boolean | null;
   email: string | null;
   profileId?: string | null;
+  sessionId?: string | null;
 }
 
 export interface QuizProfileApiRequest {

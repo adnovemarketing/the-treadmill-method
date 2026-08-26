@@ -6,7 +6,7 @@ import { ProgressBar } from "./ProgressBar";
 import { QuizLayout } from "./QuizLayout";
 import { useLocale } from "@/core/i18n/useLocale";
 import { cn } from "@/lib/utils";
-import { trackEvent } from "@/core/utils/analytics";
+import { trackEvent, sendQuizAnalyticsEvent } from "@/core/utils/analytics";
 import { useQuizStore } from "@/core/store/quizStore";
 import { QuizData, QuizStep } from "@/core/types/quiz";
 
@@ -91,13 +91,36 @@ export function QuizContainer() {
   const completedRef = useRef(false);
 
   useEffect(() => {
-    // 1. Log quiz_step_viewed
+    // 1. Meta Pixel event
     trackEvent("quiz_step_viewed", {
       step: currentStep,
       stepNumber,
       totalSteps,
       locale,
     });
+
+    // Supabase Funnel Analytics
+    const store = useQuizStore.getState();
+    const sessionId = store.getOrCreateSessionId();
+
+    if (stepNumber === 1 && !store.trackedViewedSteps.includes("onboarding-basics")) {
+      sendQuizAnalyticsEvent({
+        sessionId,
+        eventType: "quiz_started",
+        stepSlug: "onboarding-basics",
+        stepNumber: 1,
+      });
+    }
+
+    const isNewStepView = store.markStepViewedTracked(currentStep);
+    if (isNewStepView) {
+      sendQuizAnalyticsEvent({
+        sessionId,
+        eventType: "step_viewed",
+        stepSlug: currentStep,
+        stepNumber,
+      });
+    }
 
     // 2. Log question_answered if we moved from a previous step
     if (prevStepRef.current && prevStepRef.current !== currentStep) {
@@ -107,6 +130,13 @@ export function QuizContainer() {
         step: prevStepRef.current,
         answer: answeredValue,
         locale,
+      });
+
+      sendQuizAnalyticsEvent({
+        sessionId,
+        eventType: "question_answered",
+        stepSlug: prevStepRef.current,
+        payload: { answer: answeredValue },
       });
     }
 

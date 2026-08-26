@@ -7,6 +7,10 @@ interface QuizState {
   currentStep: QuizStep;
   history: QuizStep[];
   futureSteps: QuizStep[];
+  sessionId: string;
+  trackedViewedSteps: string[];
+  getOrCreateSessionId: () => string;
+  markStepViewedTracked: (step: string) => boolean;
   updateData: (newData: Partial<QuizData>) => void;
   goToStep: (step: QuizStep) => void;
   setStep: (step: QuizStep) => void;
@@ -43,8 +47,19 @@ const initialQuizData: QuizData = {
   readyToChange: null,
   email: null,
   profileId: null,
+  sessionId: null,
 };
 
+function generateUUID(): string {
+  if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
+    return crypto.randomUUID();
+  }
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
+    const r = (Math.random() * 16) | 0;
+    const v = c === 'x' ? r : (r & 0x3) | 0x8;
+    return v.toString(16);
+  });
+}
 
 export const useQuizStore = create<QuizState>()(
   persist(
@@ -53,6 +68,25 @@ export const useQuizStore = create<QuizState>()(
       currentStep: 'onboarding-basics',
       history: [],
       futureSteps: [],
+      sessionId: '',
+      trackedViewedSteps: [],
+
+      getOrCreateSessionId: () => {
+        const { sessionId } = get();
+        if (sessionId) return sessionId;
+        const newSessionId = generateUUID();
+        set({ sessionId: newSessionId });
+        return newSessionId;
+      },
+
+      markStepViewedTracked: (step) => {
+        const { trackedViewedSteps } = get();
+        if (trackedViewedSteps.includes(step)) {
+          return false; // Already tracked
+        }
+        set({ trackedViewedSteps: [...trackedViewedSteps, step] });
+        return true; // First time tracking this step
+      },
 
       updateData: (newData) =>
         set((state) => ({
@@ -109,6 +143,8 @@ export const useQuizStore = create<QuizState>()(
           currentStep: 'onboarding-basics',
           history: [],
           futureSteps: [],
+          sessionId: generateUUID(),
+          trackedViewedSteps: [],
         }),
     }),
     {
@@ -117,3 +153,4 @@ export const useQuizStore = create<QuizState>()(
     }
   )
 );
+

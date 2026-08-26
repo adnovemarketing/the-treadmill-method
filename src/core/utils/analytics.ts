@@ -51,3 +51,38 @@ export function trackEvent(event: AnalyticsEvent, params: AnalyticsPayload = {})
     }
   }
 }
+
+export function sendQuizAnalyticsEvent(params: {
+  sessionId: string;
+  eventType: 'quiz_started' | 'step_viewed' | 'question_answered' | 'lead_submitted' | 'offer_cta_clicked' | 'checkout_started';
+  stepSlug?: string | null;
+  stepNumber?: number | null;
+  payload?: Record<string, unknown> | null;
+}) {
+  if (typeof window === 'undefined' || !params.sessionId) return;
+
+  const data = JSON.stringify({
+    session_id: params.sessionId,
+    event_type: params.eventType,
+    step_slug: params.stepSlug,
+    step_number: params.stepNumber,
+    payload: params.payload,
+  });
+
+  try {
+    if (typeof navigator !== 'undefined' && navigator.sendBeacon) {
+      const blob = new Blob([data], { type: 'application/json' });
+      navigator.sendBeacon('/api/analytics/event', blob);
+    } else {
+      fetch('/api/analytics/event', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: data,
+        keepalive: true,
+      }).catch(() => {});
+    }
+  } catch {
+    // Fail silently so UI/quiz execution is never interrupted
+  }
+}
+

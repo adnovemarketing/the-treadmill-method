@@ -21,7 +21,7 @@ import { cn } from "@/lib/utils";
 import { VISUAL_ASSETS } from "@/config/visualAssets";
 import { useQuizStore } from "@/core/store/quizStore";
 import { CRO_FLAGS } from "@/config/flags";
-import { trackEvent } from "@/core/utils/analytics";
+import { trackEvent, sendQuizAnalyticsEvent } from "@/core/utils/analytics";
 
 // Componente de FAQ Accordion Unitário
 function FAQItem({ question, answer }: { question: string; answer: string }) {
@@ -114,6 +114,15 @@ export default function CheckoutPage() {
       const selectedPrice = formatCurrency(config.prices.single, locale);
 
       trackEvent("checkout_clicked", { plan: "single_9_90", price: selectedPrice, locale, profileId });
+
+      const sessionId = useQuizStore.getState().sessionId || quizData.sessionId;
+      if (sessionId) {
+        sendQuizAnalyticsEvent({
+          sessionId,
+          eventType: "checkout_started",
+          payload: { plan: "single_9_90", price: selectedPrice, locale, profileId },
+        });
+      }
 
       const response = await fetch("/api/checkout/create", {
         method: "POST",

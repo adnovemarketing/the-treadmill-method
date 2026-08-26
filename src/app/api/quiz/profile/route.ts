@@ -5,8 +5,9 @@ import { generatePersonalisedPlan } from '@/core/personalisation/engine';
 
 export async function POST(request: NextRequest) {
   try {
-    const body: Partial<QuizProfileApiRequest> = await request.json();
-    const { email, quizData } = body || {};
+    const body: Record<string, unknown> = await request.json();
+    const { email, quizData, session_id } = body || {};
+    const sessionId = (session_id as string) || (quizData as Record<string, unknown>)?.sessionId as string || null;
 
     if (!email || typeof email !== 'string') {
       return NextResponse.json<QuizProfileApiResponse>(
@@ -32,13 +33,14 @@ export async function POST(request: NextRequest) {
     }
 
     const supabase = getSupabaseServerClient();
-    const plan = generatePersonalisedPlan(quizData);
+    const plan = generatePersonalisedPlan(quizData as any);
 
     const { data: insertedRecord, error: insertError } = await supabase
       .from('quiz_profiles')
       .insert({
         email: normalizedEmail,
-        quiz_data: { ...quizData, email: normalizedEmail },
+        session_id: sessionId,
+        quiz_data: { ...(quizData as object), email: normalizedEmail, sessionId },
         programme: plan.programme,
         starting_level: plan.starting_level,
         sessions_per_week: plan.sessions_per_week,
