@@ -144,7 +144,11 @@ export default function ReportPage() {
             {t.report.title}
           </h1>
           <p className="text-xs text-zinc-400 mt-2">
-            {t.report.subtitle.replace("{email}", data.email || "")}
+            {data.email
+              ? t.report.subtitle.replace("{email}", data.email)
+              : locale === "pt-br"
+              ? "Métricas de saúde e estrutura de treino personalizadas para seu perfil."
+              : "Health metrics and training structure calculated for your profile."}
           </p>
         </div>
 

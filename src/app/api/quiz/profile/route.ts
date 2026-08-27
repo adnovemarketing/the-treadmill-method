@@ -1,28 +1,27 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseServerClient } from '@/lib/supabaseServer';
-import { QuizProfileApiRequest, QuizProfileApiResponse } from '@/core/types/quiz';
+import { QuizProfileApiResponse } from '@/core/types/quiz';
 import { generatePersonalisedPlan } from '@/core/personalisation/engine';
 
 export async function POST(request: NextRequest) {
   try {
     const body: Record<string, unknown> = await request.json();
     const { email, quizData, session_id } = body || {};
-    const sessionId = (session_id as string) || (quizData as Record<string, unknown>)?.sessionId as string || null;
+    const sessionId =
+      (session_id as string) ||
+      ((quizData as Record<string, unknown>)?.sessionId as string) ||
+      null;
 
-    if (!email || typeof email !== 'string') {
-      return NextResponse.json<QuizProfileApiResponse>(
-        { success: false, error: 'Email is required.' },
-        { status: 400 }
-      );
-    }
-
-    const normalizedEmail = email.trim().toLowerCase();
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(normalizedEmail)) {
-      return NextResponse.json<QuizProfileApiResponse>(
-        { success: false, error: 'Invalid email format.' },
-        { status: 400 }
-      );
+    let normalizedEmail: string | null = null;
+    if (email && typeof email === 'string' && email.trim().length > 0) {
+      normalizedEmail = email.trim().toLowerCase();
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(normalizedEmail)) {
+        return NextResponse.json<QuizProfileApiResponse>(
+          { success: false, error: 'Invalid email format.' },
+          { status: 400 }
+        );
+      }
     }
 
     if (!quizData || typeof quizData !== 'object') {
@@ -33,8 +32,29 @@ export async function POST(request: NextRequest) {
     }
 
     const supabase = getSupabaseServerClient();
+
+    // 1. Idempotency Check: Pre-lookup by session_id if present
+    if (sessionId) {
+      const { data: existingProfile } = await supabase
+        .from('quiz_profiles')
+        .select('id')
+        .eq('session_id', sessionId)
+        .maybeSingle();
+
+      if (existingProfile) {
+        return NextResponse.json<QuizProfileApiResponse>(
+          {
+            success: true,
+            profile_id: existingProfile.id,
+          },
+          { status: 200 }
+        );
+      }
+    }
+
     const plan = generatePersonalisedPlan(quizData as any);
 
+    // 2. Insert new quiz profile
     const { data: insertedRecord, error: insertError } = await supabase
       .from('quiz_profiles')
       .insert({
@@ -54,6 +74,25 @@ export async function POST(request: NextRequest) {
       .single();
 
     if (insertError) {
+      // 3. Race condition handling: PostgreSQL 23505 (unique_violation)
+      if (insertError.code === '23505' && sessionId) {
+        const { data: racedProfile } = await supabase
+          .from('quiz_profiles')
+          .select('id')
+          .eq('session_id', sessionId)
+          .maybeSingle();
+
+        if (racedProfile) {
+          return NextResponse.json<QuizProfileApiResponse>(
+            {
+              success: true,
+              profile_id: racedProfile.id,
+            },
+            { status: 200 }
+          );
+        }
+      }
+
       console.error('[Quiz Profile DB Insert Error]:', insertError.message);
       return NextResponse.json<QuizProfileApiResponse>(
         { success: false, error: 'Failed to persist quiz profile.' },

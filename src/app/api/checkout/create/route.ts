@@ -68,7 +68,7 @@ export async function POST(request: NextRequest) {
           quantity: 1,
         },
       ],
-      customer_email: profile.email || undefined,
+      customer_email: profile.email ? profile.email : undefined,
       client_reference_id: profile.id,
       metadata: {
         profile_id: profile.id,

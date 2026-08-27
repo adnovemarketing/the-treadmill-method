@@ -132,6 +132,7 @@ export function useQuizNavigation() {
     return ![
       "loading-calculation",
       "report-projection",
+      "email-capture",
     ].includes(step);
   };
 

@@ -61,7 +61,7 @@ export async function POST(request: NextRequest) {
       // Verify referenced quiz profile exists
       const { data: profile } = await supabase
         .from('quiz_profiles')
-        .select('id')
+        .select('id, email')
         .eq('id', profileId)
         .maybeSingle();
 
@@ -72,6 +72,49 @@ export async function POST(request: NextRequest) {
         return NextResponse.json(
           { error: `Quiz profile ${profileId} not found.` },
           { status: 404 }
+        );
+      }
+
+      // Extract and normalize Stripe customer email
+      const rawStripeEmail =
+        session.customer_details?.email ||
+        session.customer_email ||
+        (typeof session.customer === 'object' &&
+        session.customer &&
+        'email' in session.customer
+          ? (session.customer as { email?: string }).email
+          : null) ||
+        null;
+
+      const normalizedCustomerEmail =
+        typeof rawStripeEmail === 'string' && rawStripeEmail.trim().length > 0
+          ? rawStripeEmail.trim().toLowerCase()
+          : null;
+
+      // Backfill email in quiz_profiles if it was NULL for this specific profile
+      if (!profile.email && normalizedCustomerEmail) {
+        const { error: backfillError } = await supabase
+          .from('quiz_profiles')
+          .update({ email: normalizedCustomerEmail })
+          .eq('id', profileId);
+
+        if (backfillError) {
+          console.error(
+            `[Stripe Webhook Error]: Failed to backfill email for profile ${profileId}:`,
+            backfillError.message
+          );
+          return NextResponse.json(
+            { error: 'Failed to backfill quiz profile email.' },
+            { status: 500 }
+          );
+        }
+      } else if (
+        profile.email &&
+        normalizedCustomerEmail &&
+        profile.email.toLowerCase() !== normalizedCustomerEmail
+      ) {
+        console.warn(
+          `[Stripe Webhook Warning]: Profile ${profileId} already has email set. Preserving existing profile email.`
         );
       }
 
