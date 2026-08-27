@@ -2,9 +2,9 @@ import React from 'react';
 import { redirect } from 'next/navigation';
 import { MemberNav } from '@/components/member/MemberNav';
 import { createSupabaseServerAppClient } from '@/lib/supabase/server';
-import { checkAndLinkUserEntitlement } from '@/lib/entitlement';
+import { checkAndLinkUserEntitlement, checkProductEntitlement } from '@/lib/entitlement';
 import { EFFORT_SCALE } from '@/core/programmes/effortScale';
-import { BookOpen, Heart, HelpCircle, CheckCircle2, AlertTriangle } from 'lucide-react';
+import { BookOpen, Heart, HelpCircle, CheckCircle2, AlertTriangle, FileText } from 'lucide-react';
 
 interface ResourcesPageProps {
   params: Promise<{ locale: string }>;
@@ -28,6 +28,8 @@ export default async function ResourcesPage({ params }: ResourcesPageProps) {
     redirect(`/${locale}/no-access`);
   }
 
+  const hasMobilityEntitlement = await checkProductEntitlement(user.id, 'mobility_protocol');
+
   return (
     <div className="min-h-screen bg-zinc-950 text-zinc-50 flex flex-col justify-between selection:bg-brand-lime selection:text-zinc-950">
       <MemberNav locale={locale} />
@@ -46,6 +48,38 @@ export default async function ResourcesPage({ params }: ResourcesPageProps) {
               : 'Everything you need to know to execute your routine safely, comfortably, and consistently.'}
           </p>
         </div>
+
+        {/* MOBILITY PROTOCOL RESOURCE (Only for entitled buyers) */}
+        {hasMobilityEntitlement && (
+          <div className="bg-brand-lime/5 border border-brand-lime/30 p-6 rounded-3xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-xl shadow-lime-500/5">
+            <div className="flex flex-col gap-1.5 max-w-xl">
+              <div className="flex items-center gap-2">
+                <span className="text-[9px] font-heading font-extrabold text-zinc-950 uppercase bg-brand-lime px-2.5 py-0.5 rounded-full tracking-wider">
+                  {isPtBr ? 'INCLUSO NA SUA COMPRA' : 'INCLUDED WITH YOUR PURCHASE'}
+                </span>
+              </div>
+              <h2 className="text-base font-heading font-black text-zinc-50 uppercase tracking-tight mt-1">
+                {isPtBr
+                  ? 'Protocolo de Mobilidade Pré & Pós Caminhada (5 Minutos)'
+                  : '5-Minute Pre & Post Walk Mobility Protocol'}
+              </h2>
+              <p className="text-xs text-zinc-300 leading-relaxed">
+                {isPtBr
+                  ? 'Uma rotina simples e ilustrada para preparar tornozelos, joelhos e quadril antes da caminhada — e ajudar seu corpo a desacelerar depois.'
+                  : 'A simple illustrated pre- and post-walk routine for ankles, knees and hips.'}
+              </p>
+            </div>
+            <a
+              href="/api/resources/mobility-protocol"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="bg-brand-lime text-zinc-950 hover:bg-brand-lime-hover font-heading font-bold text-xs tracking-wide px-5 py-3.5 rounded-xl transition-all flex items-center gap-2 shrink-0 shadow-md shadow-lime-400/10 cursor-pointer"
+            >
+              <FileText className="w-4 h-4" />
+              {isPtBr ? 'Abrir Guia de Mobilidade' : 'Open Mobility Guide'}
+            </a>
+          </div>
+        )}
 
         {/* 1. QUICK START */}
         <div className="bg-zinc-900/40 border border-zinc-900 p-6 rounded-3xl flex flex-col gap-4">

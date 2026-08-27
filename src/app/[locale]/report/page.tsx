@@ -189,7 +189,7 @@ export default function ReportPage() {
                   {imcCatLabel}
                 </span>
               </div>
-              <span className="text-[10px] text-zinc-600 font-extrabold font-heading">IMC</span>
+              <span className="text-[10px] text-zinc-600 font-extrabold font-heading">BMI</span>
             </div>
           </div>
 

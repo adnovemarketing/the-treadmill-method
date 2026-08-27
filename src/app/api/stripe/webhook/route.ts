@@ -25,9 +25,9 @@ export async function POST(request: NextRequest) {
   }
 
   let event: Stripe.Event;
+  const stripe = getStripeServerClient();
 
   try {
-    const stripe = getStripeServerClient();
     event = stripe.webhooks.constructEvent(bodyText, signature, webhookSecret);
   } catch (err: unknown) {
     const errorMessage = err instanceof Error ? err.message : 'Unknown error';
@@ -129,25 +129,29 @@ export async function POST(request: NextRequest) {
       const paidAt = isPaid ? new Date().toISOString() : null;
 
       // Idempotent upsert into public.purchases on stripe_checkout_session_id
-      const { error: insertError } = await supabase.from('purchases').upsert(
-        {
-          profile_id: profileId,
-          stripe_checkout_session_id: session.id,
-          stripe_customer_id: customerId,
-          payment_status: session.payment_status || 'completed',
-          amount_total: session.amount_total ?? null,
-          currency: session.currency ?? null,
-          paid_at: paidAt,
-        },
-        {
-          onConflict: 'stripe_checkout_session_id',
-        }
-      );
+      const { data: purchaseRecord, error: insertError } = await supabase
+        .from('purchases')
+        .upsert(
+          {
+            profile_id: profileId,
+            stripe_checkout_session_id: session.id,
+            stripe_customer_id: customerId,
+            payment_status: session.payment_status || 'completed',
+            amount_total: session.amount_total ?? null,
+            currency: session.currency ?? null,
+            paid_at: paidAt,
+          },
+          {
+            onConflict: 'stripe_checkout_session_id',
+          }
+        )
+        .select('id')
+        .single();
 
-      if (insertError) {
+      if (insertError || !purchaseRecord) {
         console.error(
           `[Stripe Webhook Error]: Failed to persist purchase for session ${session.id}:`,
-          insertError.message
+          insertError?.message || 'No purchase record returned'
         );
         return NextResponse.json(
           { error: 'Failed to persist purchase record.' },
@@ -158,6 +162,52 @@ export async function POST(request: NextRequest) {
       console.log(
         `[Stripe Webhook Success]: Purchase recorded for profile ${profileId}, session ${session.id}.`
       );
+
+      // Fetch actual paid line items from Stripe API to store item entitlements
+      const mainPriceId = process.env.STRIPE_PRICE_ID;
+      const mobilityPriceId = process.env.STRIPE_MOBILITY_PROTOCOL_PRICE_ID;
+      const lineItems = await stripe.checkout.sessions.listLineItems(session.id);
+
+      for (const item of lineItems.data) {
+        const itemPriceId = item.price?.id;
+        if (!itemPriceId) continue;
+
+        let productKey: string | null = null;
+        if (mainPriceId && itemPriceId === mainPriceId) {
+          productKey = 'main_treadmill_method';
+        } else if (mobilityPriceId && itemPriceId === mobilityPriceId) {
+          productKey = 'mobility_protocol';
+        }
+
+        if (productKey) {
+          const { error: itemInsertError } = await supabase
+            .from('purchase_items')
+            .upsert(
+              {
+                purchase_id: purchaseRecord.id,
+                profile_id: profileId,
+                stripe_price_id: itemPriceId,
+                product_key: productKey,
+                amount: item.amount_total ?? null,
+                currency: session.currency ?? null,
+              },
+              {
+                onConflict: 'purchase_id,stripe_price_id',
+              }
+            );
+
+          if (itemInsertError) {
+            console.error(
+              `[Stripe Webhook Error]: Failed to persist purchase_items for product ${productKey}, session ${session.id}:`,
+              itemInsertError.message
+            );
+            return NextResponse.json(
+              { error: 'Failed to persist purchase item entitlements.' },
+              { status: 500 }
+            );
+          }
+        }
+      }
 
       // Trigger server-side Meta CAPI Purchase event for confirmed paid sessions
       if (isPaid) {

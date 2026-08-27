@@ -78,3 +78,34 @@ export async function checkAndLinkUserEntitlement(
     purchaseId: purchase.id,
   };
 }
+
+/**
+ * Server-side helper to verify if a specific product (e.g. 'mobility_protocol')
+ * has been purchased and is entitled for the given authenticated userId.
+ */
+export async function checkProductEntitlement(
+  userId: string,
+  productKey: string
+): Promise<boolean> {
+  if (!userId || !productKey) {
+    return false;
+  }
+
+  const supabase = getSupabaseServerClient();
+
+  // Query paid purchase_items linked to the user's valid paid purchases
+  const { data: items, error } = await supabase
+    .from('purchase_items')
+    .select('id, purchases!inner(id, user_id, payment_status)')
+    .eq('product_key', productKey)
+    .eq('purchases.user_id', userId)
+    .in('purchases.payment_status', ['paid', 'completed', 'active', 'succeeded'])
+    .limit(1);
+
+  if (error || !items || items.length === 0) {
+    return false;
+  }
+
+  return true;
+}
+

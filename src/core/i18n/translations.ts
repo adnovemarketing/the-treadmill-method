@@ -620,7 +620,7 @@ export const translations: Record<Locale | 'pt-br', TranslationSchema> = {
       planSectionTitle: 'YOUR PERSONALISED OFFER:',
       singleLabel: 'The Treadmill Method — Full Access',
       singleBadge: 'ONE-TIME PAYMENT',
-      singleSub: 'Single one-time payment. Full access with no subscription or recurring fees.',
+      singleSub: 'Single one-time payment. Instant access to interactive digital protocols, video/audio guides, and printable charts directly on your phone, tablet, or computer.',
       quarterlyLabel: '3-Month Membership',
       quarterlyBadge: 'MOST POPULAR / BEST VALUE',
       monthlyLabel: '1-Month Membership',
@@ -635,6 +635,7 @@ export const translations: Record<Locale | 'pt-br', TranslationSchema> = {
       guaranteeDesc: 'We are so confident in The Treadmill Method that if you do not feel a difference in your stamina or fitness within 4 weeks of starting, simply email us for a 100% refund. No questions asked.',
       whatYouGetTitle: 'What is included in your plan:',
       whatYouGetItems: [
+        'Instant Digital Web App & PDF Protocol Access (No waiting, access anywhere)',
         'Minute-by-minute speed & incline treadmill charts.',
         'Target metabolic heart rate zone calculators.',
         'Companion training audio guides for the treadmill.',
@@ -987,7 +988,7 @@ export const translations: Record<Locale | 'pt-br', TranslationSchema> = {
       planSectionTitle: 'SUA OFERTA PERSONALIZADA:',
       singleLabel: 'The Treadmill Method — Acesso Completo',
       singleBadge: 'PAGAMENTO ÚNICO',
-      singleSub: 'Pagamento único. Acesso completo sem mensalidades ou cobranças recorrentes.',
+      singleSub: 'Pagamento único. Acesso instantâneo aos protocolos digitais interativos, guias de vídeo/áudio e tabelas para impressão diretamente no seu celular, tablet ou computador.',
       quarterlyLabel: 'Acesso por 3 Meses',
       quarterlyBadge: 'MAIS POPULAR / MELHOR CUSTO',
       monthlyLabel: 'Acesso por 1 Mês',
@@ -1002,6 +1003,7 @@ export const translations: Record<Locale | 'pt-br', TranslationSchema> = {
       guaranteeDesc: 'Temos tanta confiança na metodologia do The Treadmill Method que se você não notar evolução na sua queima calórica ou fôlego nas primeiras 4 semanas de treinos diários, devolvemos 100% do seu dinheiro.',
       whatYouGetTitle: 'O que você vai receber hoje:',
       whatYouGetItems: [
+        'Acesso Instantâneo ao Web App Digital e Protocolos PDF (Sem espera, acesse de qualquer lugar)',
         'Tabela minuto a minuto de velocidades e inclinações.',
         'Calculadora de faixas cardíacas de queima metabólica.',
         'Áudios instrutivos de apoio para ouvir na esteira.',

@@ -5,12 +5,13 @@ import { getStripeServerClient } from '@/lib/stripeServer';
 interface CreateCheckoutRequestBody {
   profile_id: string;
   locale?: string;
+  include_mobility_protocol?: boolean;
 }
 
 export async function POST(request: NextRequest) {
   try {
     const body: Partial<CreateCheckoutRequestBody> = await request.json();
-    const { profile_id, locale = 'en-gb' } = body || {};
+    const { profile_id, locale = 'en-gb', include_mobility_protocol = false } = body || {};
 
     if (!profile_id || typeof profile_id !== 'string') {
       return NextResponse.json(
@@ -37,6 +38,15 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    const mobilityPriceId = process.env.STRIPE_MOBILITY_PROTOCOL_PRICE_ID;
+    if (include_mobility_protocol && !mobilityPriceId) {
+      console.error('[Checkout API Error]: STRIPE_MOBILITY_PROTOCOL_PRICE_ID is not configured.');
+      return NextResponse.json(
+        { success: false, error: 'Stripe mobility pricing is not configured.' },
+        { status: 500 }
+      );
+    }
+
     // Fetch the quiz profile server-side
     const supabase = getSupabaseServerClient();
     const { data: profile, error: dbError } = await supabase
@@ -52,6 +62,21 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Build line items server-side
+    const lineItems: Array<{ price: string; quantity: number }> = [
+      {
+        price: priceId,
+        quantity: 1,
+      },
+    ];
+
+    if (include_mobility_protocol && mobilityPriceId) {
+      lineItems.push({
+        price: mobilityPriceId,
+        quantity: 1,
+      });
+    }
+
     // Resolve base site URL
     const origin = request.headers.get('origin');
     const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || origin || 'http://localhost:3000';
@@ -62,12 +87,7 @@ export async function POST(request: NextRequest) {
     // Create Stripe Checkout Session
     const session = await stripe.checkout.sessions.create({
       mode: 'payment',
-      line_items: [
-        {
-          price: priceId,
-          quantity: 1,
-        },
-      ],
+      line_items: lineItems,
       customer_email: profile.email ? profile.email : undefined,
       client_reference_id: profile.id,
       metadata: {

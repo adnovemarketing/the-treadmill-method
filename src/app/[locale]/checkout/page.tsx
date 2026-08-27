@@ -57,6 +57,7 @@ export default function CheckoutPage() {
   const { data: quizData } = useQuizStore();
 
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [includeMobilityProtocol, setIncludeMobilityProtocol] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const [timeLeft, setTimeLeft] = useState<number>(() => {
@@ -113,14 +114,14 @@ export default function CheckoutPage() {
     try {
       const selectedPrice = formatCurrency(config.prices.single, locale);
 
-      trackEvent("checkout_clicked", { plan: "single_9_90", price: selectedPrice, locale, profileId });
+      trackEvent("checkout_clicked", { plan: "single_9_90", price: selectedPrice, locale, profileId, includeMobilityProtocol });
 
       const sessionId = useQuizStore.getState().sessionId || quizData.sessionId;
       if (sessionId) {
         sendQuizAnalyticsEvent({
           sessionId,
           eventType: "checkout_started",
-          payload: { plan: "single_9_90", price: selectedPrice, locale, profileId },
+          payload: { plan: "single_9_90", price: selectedPrice, locale, profileId, includeMobilityProtocol },
         });
       }
 
@@ -132,6 +133,7 @@ export default function CheckoutPage() {
         body: JSON.stringify({
           profile_id: profileId,
           locale,
+          include_mobility_protocol: includeMobilityProtocol,
         }),
       });
 
@@ -233,6 +235,52 @@ export default function CheckoutPage() {
                 </div>
                 <div className="border-t border-zinc-900 pt-2 flex justify-between items-center text-[10px] text-zinc-400">
                   <span>{t.offer.singleSub}</span>
+                </div>
+              </div>
+
+              {/* Order Bump: 5-Minute Mobility Protocol */}
+              <div
+                onClick={() => setIncludeMobilityProtocol(!includeMobilityProtocol)}
+                className={cn(
+                  "w-full text-left p-4.5 rounded-2xl border transition-all cursor-pointer select-none relative flex flex-col gap-2.5",
+                  includeMobilityProtocol
+                    ? "bg-brand-lime/10 border-brand-lime shadow-md shadow-lime-400/5"
+                    : "bg-zinc-900/60 border-zinc-800 hover:border-zinc-700"
+                )}
+              >
+                <div className="flex items-start gap-3">
+                  <input
+                    type="checkbox"
+                    checked={includeMobilityProtocol}
+                    onChange={(e) => setIncludeMobilityProtocol(e.target.checked)}
+                    onClick={(e) => e.stopPropagation()}
+                    className="mt-1 w-4 h-4 rounded border-zinc-700 bg-zinc-950 text-brand-lime focus:ring-brand-lime cursor-pointer accent-brand-lime shrink-0"
+                  />
+                  <div className="flex flex-col gap-1 flex-1">
+                    <div className="flex items-center justify-between gap-2 flex-wrap">
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs font-heading font-black text-zinc-100 uppercase tracking-tight">
+                          {locale === "pt-br"
+                            ? "Adicionar o Protocolo de Mobilidade Pré & Pós Caminhada (5 Minutos)"
+                            : "Add the 5-Minute Pre & Post Walk Mobility Protocol"}
+                        </span>
+                        <span className="text-[9px] font-heading font-extrabold px-2 py-0.5 rounded-full uppercase tracking-wider bg-zinc-800 text-zinc-300 border border-zinc-700">
+                          {locale === "pt-br" ? "OPCIONAL" : "OPTIONAL"}
+                        </span>
+                      </div>
+                      <span className="text-xs font-heading font-black text-brand-lime">
+                        + {formatCurrency(4.9, locale)}
+                      </span>
+                    </div>
+                    <p className="text-[11px] text-zinc-400 leading-relaxed">
+                      {locale === "pt-br"
+                        ? "Uma rotina simples e ilustrada para preparar tornozelos, joelhos e quadril antes da caminhada — e ajudar seu corpo a desacelerar depois."
+                        : "A simple illustrated routine to prepare your ankles, knees and hips before treadmill walking — and help your body wind down afterwards."}
+                    </p>
+                    <div className="flex items-center gap-1.5 text-[10px] font-bold text-brand-lime mt-0.5">
+                      <span>{includeMobilityProtocol ? (locale === "pt-br" ? "✓ Adicionado ao plano" : "✓ Added to your plan") : (locale === "pt-br" ? "+ Adicionar ao meu plano" : "+ Add to my plan")}</span>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
@@ -411,6 +459,11 @@ export default function CheckoutPage() {
             <div className="bg-zinc-900/40 border border-zinc-900 p-5 rounded-3xl flex flex-col items-center justify-center relative overflow-hidden select-none">
               <div className="absolute inset-0 bg-gradient-to-tr from-brand-lime/5 via-transparent to-brand-teal/5 opacity-80" />
               
+              {/* Badge / Pill tag de Entrega Digital */}
+              <span className="text-[9px] font-heading font-black text-brand-lime uppercase tracking-wider bg-brand-lime/10 border border-brand-lime/20 px-3 py-1 rounded-full mb-3 relative z-10 text-center">
+                {locale === "pt-br" ? "⚡ ACESSO DIGITAL INSTANTÂNEO • SEM FRETE FÍSICO" : "⚡ INSTANT DIGITAL ACCESS • NO PHYSICAL SHIPPING"}
+              </span>
+
               <div className="w-48 h-36 relative z-10 drop-shadow-[0_15px_30px_rgba(0,0,0,0.5)]">
                 <Image
                   src={VISUAL_ASSETS.mockups.offerProduct}
@@ -424,7 +477,7 @@ export default function CheckoutPage() {
               <span className="text-[10px] font-heading font-black text-brand-lime uppercase tracking-widest mt-4 relative z-10">
                 {locale === "pt-br" ? "MÉTODO DE ESTEIRA COMPLETO" : "COMPLETE TREADMILL METHOD"}
               </span>
-              <span className="text-[9px] text-zinc-500 font-medium text-center max-w-[150px] mt-1 relative z-10 leading-normal">
+              <span className="text-[9px] text-zinc-500 font-medium text-center max-w-[170px] mt-1 relative z-10 leading-normal">
                 {locale === "pt-br" ? "Planilha de caminhada + Guia nutricional inclusos" : "Includes walks planner & nutritional guide"}
               </span>
             </div>
@@ -477,6 +530,50 @@ export default function CheckoutPage() {
                   </>
                 )}
               </Button>
+
+              {/* Strip de Métodos de Pagamento e Trust Badges sob o CTA */}
+              <div className="flex flex-col items-center gap-2 mt-1.5 w-full select-none">
+                <div className="flex flex-wrap items-center justify-center gap-1.5 sm:gap-2 text-zinc-400 opacity-90 w-full">
+                  {/* Apple Pay */}
+                  <span className="flex items-center gap-1 bg-zinc-950 border border-zinc-800 px-2 py-1 rounded-lg text-[10px] font-bold text-zinc-300">
+                    <svg className="w-3.5 h-3.5 fill-current" viewBox="0 0 170 170">
+                      <path d="M150.37 130.25c-2.45 5.66-5.35 10.87-8.71 15.66-4.58 6.53-8.33 11.05-11.22 13.56-4.48 4.12-9.28 6.23-14.42 6.35-3.69 0-8.14-1.05-13.32-3.18-5.19-2.12-9.97-3.17-14.34-3.17-4.58 0-9.49 1.05-14.75 3.17-5.26 2.13-9.5 3.24-12.74 3.35-5.04.24-9.97-1.78-14.8-6.05-3.18-2.74-7.06-7.38-11.64-13.92-6.61-9.43-11.83-19.98-15.66-31.65-3.83-11.68-5.75-22.95-5.75-33.82 0-15.42 3.84-28.18 11.53-38.27 7.69-10.09 17.51-15.25 29.47-15.48 4.47 0 9.42 1.13 14.85 3.38 5.43 2.25 9.47 3.38 12.12 3.38 2.45 0 6.64-1.18 12.57-3.53 5.93-2.36 10.74-3.44 14.43-3.24 10.37.7 18.99 4.3 25.85 10.8 2.82 2.68 5.15 5.56 6.99 8.64-14.35 8.67-21.36 20.61-21.03 35.82.33 11.66 4.67 21.28 13.02 28.87 5.04 4.54 10.87 7.6 17.49 9.18-1.52 4.48-3.37 9.07-5.55 13.77zM119.22 31.54c0-7.39 2.69-14.35 8.07-20.88 5.38-6.53 12.14-10.45 20.28-11.76.22 1.09.33 2.07.33 2.94 0 7.39-2.77 14.45-8.31 21.18-5.54 6.73-12.35 10.65-20.43 11.76-.11-.98-.17-1.9-.17-2.76z"/>
+                    </svg>
+                    Apple Pay
+                  </span>
+
+                  {/* Google Pay */}
+                  <span className="flex items-center gap-1 bg-zinc-950 border border-zinc-800 px-2 py-1 rounded-lg text-[10px] font-bold text-zinc-300">
+                    <svg className="w-3.5 h-3.5" viewBox="0 0 24 24">
+                      <path fill="#4285F4" d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.82-2.4 3.68v3.05h3.88c2.27-2.09 3.665-5.17 3.665-9.17z"/>
+                      <path fill="#34A853" d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.05c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.1-6.72-4.93H1.29v3.15C3.26 21.3 7.31 24 12 24z"/>
+                      <path fill="#FBBC05" d="M5.28 14.27c-.25-.72-.38-1.49-.38-2.27s.13-1.55.38-2.27V6.58H1.29C.47 8.2.0 10.04.0 12s.47 3.8 1.29 5.42l3.99-3.15z"/>
+                      <path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.31 0 3.26 2.7 1.29 6.58l3.99 3.15c.95-2.83 3.6-4.98 6.72-4.98z"/>
+                    </svg>
+                    GPay
+                  </span>
+
+                  {/* PayPal */}
+                  <span className="flex items-center gap-1 bg-zinc-950 border border-zinc-800 px-2 py-1 rounded-lg text-[10px] font-bold text-zinc-300">
+                    <span className="text-blue-400 font-black italic text-xs">P</span>ayPal
+                  </span>
+
+                  {/* Visa / Mastercard */}
+                  <span className="flex items-center gap-1 bg-zinc-950 border border-zinc-800 px-2 py-1 rounded-lg text-[10px] font-bold text-zinc-300">
+                    Visa / Mastercard
+                  </span>
+
+                  {/* Stripe */}
+                  <span className="flex items-center gap-1 bg-zinc-950 border border-zinc-800 px-2 py-1 rounded-lg text-[10px] font-bold text-zinc-300">
+                    Stripe 256-Bit
+                  </span>
+                </div>
+
+                {/* Subline de Segurança */}
+                <span className="text-[9px] text-zinc-400 text-center leading-normal mt-0.5 flex items-center justify-center gap-1">
+                  🔒 256-Bit Bank-Level Encryption • Guaranteed Safe & Secure Checkout
+                </span>
+              </div>
 
 
               {/* Selos de Confiança (Fase 3) */}
