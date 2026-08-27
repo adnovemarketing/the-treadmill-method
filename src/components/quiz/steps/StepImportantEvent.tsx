@@ -58,9 +58,9 @@ export function StepImportantEvent({ onNext }: StepProps) {
   };
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-12 gap-6 md:gap-8 items-center">
+    <div className="flex flex-col lg:flex-row gap-6 lg:gap-8 items-start">
       {/* Coluna Esquerda: Conteúdo e Opções */}
-      <div className="md:col-span-7 flex flex-col gap-5">
+      <div className="flex-1 min-w-0 flex flex-col gap-5">
         <div className="text-left px-1">
           <div className="flex items-center gap-2">
             <CalendarHeart className="w-4 h-4 text-brand-lime" />
@@ -89,13 +89,13 @@ export function StepImportantEvent({ onNext }: StepProps) {
         </div>
       </div>
 
-      {/* Coluna Direita: Ilustração Visual (Layout D) */}
-      <div className="md:col-span-5 hidden md:flex flex-col justify-end p-6 bg-zinc-950/40 rounded-2xl border border-zinc-900/60 aspect-square relative overflow-hidden group select-none">
+      {/* Coluna Direita: Ilustração Visual */}
+      <div className="hidden lg:flex flex-col w-56 xl:w-64 shrink-0 rounded-2xl border border-zinc-900/60 overflow-hidden bg-zinc-950/40 select-none group aspect-square relative justify-end p-6">
         <Image
           src={VISUAL_ASSETS.lifestyle.importantLifeEvents}
           alt={locale === "pt-br" ? "Evento importante planejado" : "Planned important event"}
           fill
-          sizes="33vw"
+          sizes="280px"
           className="object-contain object-bottom transition-transform duration-700 group-hover:scale-105"
         />
         <div className="absolute inset-0 bg-gradient-to-t from-zinc-950 via-zinc-950/20 to-transparent" />
