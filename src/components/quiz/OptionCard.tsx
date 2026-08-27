@@ -27,14 +27,14 @@ export function OptionCard({
   multiSelect = false,
 }: OptionCardProps) {
   return (
-     <motion.button
+    <motion.button
       type="button"
       onClick={onClick}
       whileHover={{ scale: 1.02, y: -2 }}
       whileTap={{ scale: 0.98 }}
       className={cn(
         "w-full text-left rounded-2xl border bg-zinc-900/60 backdrop-blur-sm select-none transition-all cursor-pointer flex min-w-0",
-        image ? "flex-col items-stretch p-0 overflow-hidden" : "items-center justify-between p-4 sm:p-4.5 gap-3.5",
+        image ? "flex-col items-stretch p-0 overflow-hidden" : "items-center justify-between p-3.5 sm:p-4 gap-2.5 sm:gap-3",
         selected
           ? "border-brand-lime bg-zinc-900 shadow-lg shadow-lime-500/10"
           : "border-zinc-800/80 hover:border-zinc-700 hover:bg-zinc-900/30"
@@ -46,13 +46,13 @@ export function OptionCard({
         </div>
       )}
 
-      <div className={cn("flex items-center justify-between gap-3.5 flex-1 min-w-0", image ? "p-4 md:p-5" : "")}>
-        <div className="flex items-center gap-3 flex-1 min-w-0">
+      <div className={cn("flex items-center justify-between gap-2.5 sm:gap-3 flex-1 min-w-0", image ? "p-3.5 sm:p-4" : "")}>
+        <div className="flex items-center gap-2.5 sm:gap-3 flex-1 min-w-0">
           {/* Ícone ou Emoji */}
           {icon && (
             <div
               className={cn(
-                "w-9 h-9 sm:w-10 sm:h-10 rounded-xl flex items-center justify-center transition-colors shrink-0",
+                "w-8 h-8 sm:w-9 sm:h-9 rounded-xl flex items-center justify-center transition-colors shrink-0",
                 selected
                   ? "bg-brand-lime/10 text-brand-lime"
                   : "bg-zinc-950 text-zinc-400"
@@ -63,7 +63,7 @@ export function OptionCard({
           )}
 
           {emoji && (
-            <div className="text-lg sm:text-xl w-9 h-9 sm:w-10 sm:h-10 flex items-center justify-center bg-zinc-950 rounded-xl select-none shrink-0 border border-zinc-900">
+            <div className="text-base sm:text-lg w-8 h-8 sm:w-9 sm:h-9 flex items-center justify-center bg-zinc-950 rounded-xl select-none shrink-0 border border-zinc-900">
               {emoji}
             </div>
           )}
@@ -91,7 +91,7 @@ export function OptionCard({
           {multiSelect ? (
             <div
               className={cn(
-                "w-5 h-5 rounded-md border flex items-center justify-center transition-all",
+                "w-5 h-5 rounded-md border flex items-center justify-center transition-all shrink-0",
                 selected
                   ? "bg-brand-lime border-brand-lime text-zinc-950"
                   : "border-zinc-700 bg-zinc-950"
@@ -102,7 +102,7 @@ export function OptionCard({
           ) : (
             <div
               className={cn(
-                "w-5 h-5 rounded-full border flex items-center justify-center transition-all",
+                "w-5 h-5 rounded-full border flex items-center justify-center transition-all shrink-0",
                 selected
                   ? "border-brand-lime"
                   : "border-zinc-700 bg-zinc-950"
