@@ -280,6 +280,7 @@ export interface TranslationSchema {
     ctaCardTitle: string;
     ctaCardDesc: string;
     ctaButton: string;
+    ctaPriceMicroCopy: string;
   };
   offer: {
     congratsBadge: string;
@@ -288,6 +289,8 @@ export interface TranslationSchema {
     singleLabel: string;
     singleBadge: string;
     singleSub: string;
+    totalAmountLabel: string;
+    totalLabel: string;
     quarterlyLabel: string;
     quarterlyBadge: string;
     monthlyLabel: string;
@@ -622,7 +625,8 @@ export const translations: Record<Locale | 'pt-br', TranslationSchema> = {
       ],
       ctaCardTitle: 'Ready to unlock your detailed day-by-day guides?',
       ctaCardDesc: 'This diagnostic provides the overall structure. Unlock the full program to get minute-by-minute speed and incline charts, audio guides, and nutritional guidelines.',
-      ctaButton: 'Unlock My Full Training Plan'
+      ctaButton: 'Get My Personalised Plan',
+      ctaPriceMicroCopy: 'One-time payment {price}',
     },
     offer: {
       congratsBadge: 'CONGRATULATIONS! LAUNCH OFFER ACTIVE',
@@ -631,6 +635,8 @@ export const translations: Record<Locale | 'pt-br', TranslationSchema> = {
       singleLabel: 'The Treadmill Method — Full Access',
       singleBadge: 'ONE-TIME PAYMENT',
       singleSub: 'Single one-time payment. Instant access to interactive digital protocols, video/audio guides, and printable charts directly on your phone, tablet, or computer.',
+      totalAmountLabel: 'Total Amount:',
+      totalLabel: 'Total: {price}',
       quarterlyLabel: '3-Month Membership',
       quarterlyBadge: 'MOST POPULAR / BEST VALUE',
       monthlyLabel: '1-Month Membership',
@@ -638,7 +644,7 @@ export const translations: Record<Locale | 'pt-br', TranslationSchema> = {
       monthlySub: 'Recurring monthly plan. Cancel anytime.',
       quarterlyPerDay: 'Only {price} / day',
       monthlyPerDay: 'Only {price} / day',
-      ctaButton: 'GET MY PERSONALISED PLAN NOW',
+      ctaButton: 'GET MY PERSONALISED PLAN — {price}',
       secureCheckout: 'SECURE CHECKOUT',
       sslEncrypted: 'SSL ENCRYPTED',
       guaranteeTitle: '30-Day Risk-Free Guarantee',
@@ -995,7 +1001,8 @@ export const translations: Record<Locale | 'pt-br', TranslationSchema> = {
       ],
       ctaCardTitle: 'Pronto para liberar suas planilhas de treino minuto-a-minuto?',
       ctaCardDesc: 'Este relatório oferece a estrutura geral. Libere o plano completo para receber tabelas exatas de velocidade/inclinação, áudio-guias e acompanhamento de dieta.',
-      ctaButton: 'Liberar Meu Plano de Treinos Completo'
+      ctaButton: 'Obter Meu Plano Personalizado',
+      ctaPriceMicroCopy: 'Pagamento único de {price}',
     },
     offer: {
       congratsBadge: 'PARABÉNS! DESCONTO DE LANÇAMENTO ATIVO',
@@ -1004,6 +1011,8 @@ export const translations: Record<Locale | 'pt-br', TranslationSchema> = {
       singleLabel: 'The Treadmill Method — Acesso Completo',
       singleBadge: 'PAGAMENTO ÚNICO',
       singleSub: 'Pagamento único. Acesso instantâneo aos protocolos digitais interativos, guias de vídeo/áudio e tabelas para impressão diretamente no seu celular, tablet ou computador.',
+      totalAmountLabel: 'Valor Total:',
+      totalLabel: 'Total: {price}',
       quarterlyLabel: 'Acesso por 3 Meses',
       quarterlyBadge: 'MAIS POPULAR / MELHOR CUSTO',
       monthlyLabel: 'Acesso por 1 Mês',
@@ -1011,7 +1020,7 @@ export const translations: Record<Locale | 'pt-br', TranslationSchema> = {
       monthlySub: 'Pagamento mensal recorrente. Cancele quando quiser.',
       quarterlyPerDay: 'Apenas {price} / dia',
       monthlyPerDay: 'Apenas {price} / dia',
-      ctaButton: 'OBTER MEU PLANO PERSONALIZADO AGORA',
+      ctaButton: 'OBTER MEU PLANO PERSONALIZADO — {price}',
       secureCheckout: 'CHECKOUT SEGURO',
       sslEncrypted: 'SSL ENCRIPTADO',
       guaranteeTitle: 'Garantia Incondicional de 30 Dias',

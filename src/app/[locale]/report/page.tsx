@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { calculateTargetDate, calculateIMC, getIMCCategoryKey, getIMCCategoryColor } from "@/core/utils/calculations";
 import { useRouter, useParams } from "next/navigation";
 import { useTranslations } from "@/core/i18n/translations";
+import { getMarketConfig, formatCurrency } from "@/core/i18n/config";
 import {
   Activity,
   Droplet,
@@ -27,6 +28,8 @@ export default function ReportPage() {
   const params = useParams();
   const locale = (params.locale as string) || "en-gb";
   const t = useTranslations(locale);
+  const config = getMarketConfig(locale);
+  const singlePrice = formatCurrency(config.prices.single, locale);
   // Redireciona de volta para o quiz se não houver dados preenchidos
   useEffect(() => {
     if (!data.weight || !data.height) {
@@ -154,25 +157,30 @@ export default function ReportPage() {
 
         {/* CTA âncora para utilizadores de alta intenção */}
         {CRO_FLAGS.reportTopCtaAnchor && (
-          <button
-            onClick={() => {
-              trackEvent("checkout_clicked", { source: "report_top_anchor", locale });
-              const sessionId = useQuizStore.getState().sessionId;
-              if (sessionId) {
-                sendQuizAnalyticsEvent({
-                  sessionId,
-                  eventType: "offer_cta_clicked",
-                  payload: { source: "report_top_anchor", locale },
-                });
-              }
-              router.push(`/${locale}/checkout`);
-            }}
-            className="w-full border border-brand-lime/30 text-brand-lime hover:bg-brand-lime/10 font-heading font-bold text-xs tracking-wide py-3 px-4 rounded-xl transition-all cursor-pointer flex items-center justify-center gap-2"
-            aria-label={locale === "pt-br" ? "Desbloquear plano completo" : "Unlock full plan"}
-          >
-            {t.report.ctaButton}
-            <ArrowRight className="w-3.5 h-3.5" />
-          </button>
+          <div className="flex flex-col items-center gap-1.5 w-full">
+            <button
+              onClick={() => {
+                trackEvent("checkout_clicked", { source: "report_top_anchor", locale });
+                const sessionId = useQuizStore.getState().sessionId;
+                if (sessionId) {
+                  sendQuizAnalyticsEvent({
+                    sessionId,
+                    eventType: "offer_cta_clicked",
+                    payload: { source: "report_top_anchor", locale },
+                  });
+                }
+                router.push(`/${locale}/checkout`);
+              }}
+              className="w-full border border-brand-lime/30 text-brand-lime hover:bg-brand-lime/10 font-heading font-bold text-xs tracking-wide py-3 px-4 rounded-xl transition-all cursor-pointer flex items-center justify-center gap-2"
+              aria-label={t.report.ctaButton}
+            >
+              {t.report.ctaButton}
+              <ArrowRight className="w-3.5 h-3.5" />
+            </button>
+            <span className="text-[11px] sm:text-xs text-zinc-400 font-medium">
+              {t.report.ctaPriceMicroCopy.replace("{price}", singlePrice)}
+            </span>
+          </div>
         )}
 
         {/* Resumo Biométrico */}
@@ -389,24 +397,29 @@ export default function ReportPage() {
             </p>
           </div>
 
-          <Button
-            onClick={() => {
-              trackEvent("checkout_clicked", { source: "report_bottom_cta", locale });
-              const sessionId = useQuizStore.getState().sessionId;
-              if (sessionId) {
-                sendQuizAnalyticsEvent({
-                  sessionId,
-                  eventType: "offer_cta_clicked",
-                  payload: { source: "report_bottom_cta", locale },
-                });
-              }
-              router.push(`/${locale}/checkout`);
-            }}
-            className="w-full bg-brand-lime text-zinc-950 hover:bg-brand-lime-hover font-heading font-bold text-sm tracking-wide py-6 rounded-2xl transition-all cursor-pointer flex items-center justify-center gap-2"
-          >
-            {t.report.ctaButton}
-            <ArrowRight className="w-4 h-4" />
-          </Button>
+          <div className="flex flex-col items-center gap-2 w-full">
+            <Button
+              onClick={() => {
+                trackEvent("checkout_clicked", { source: "report_bottom_cta", locale });
+                const sessionId = useQuizStore.getState().sessionId;
+                if (sessionId) {
+                  sendQuizAnalyticsEvent({
+                    sessionId,
+                    eventType: "offer_cta_clicked",
+                    payload: { source: "report_bottom_cta", locale },
+                  });
+                }
+                router.push(`/${locale}/checkout`);
+              }}
+              className="w-full bg-brand-lime text-zinc-950 hover:bg-brand-lime-hover font-heading font-bold text-sm tracking-wide py-6 rounded-2xl transition-all cursor-pointer flex items-center justify-center gap-2"
+            >
+              {t.report.ctaButton}
+              <ArrowRight className="w-4 h-4" />
+            </Button>
+            <span className="text-[11px] sm:text-xs text-zinc-300 font-medium">
+              {t.report.ctaPriceMicroCopy.replace("{price}", singlePrice)}
+            </span>
+          </div>
         </div>
       </main>
     </div>

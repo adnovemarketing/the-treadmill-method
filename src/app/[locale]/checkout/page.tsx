@@ -163,6 +163,8 @@ export default function CheckoutPage() {
 
 
   const singlePrice = formatCurrency(config.prices.single, locale);
+  const totalAmount = includeMobilityProtocol ? (config.prices.single + 4.90) : config.prices.single;
+  const currentTotalPrice = formatCurrency(totalAmount, locale);
 
   // Personalised plan name for the checkout headline
   const getPersonalisedLabel = () => {
@@ -238,11 +240,58 @@ export default function CheckoutPage() {
                 </div>
               </div>
 
+              {/* Early Mobile Purchase CTA (Mobile Only: md:hidden) */}
+              <div className="flex flex-col gap-2.5 md:hidden mt-1">
+                {/* Dynamic Total */}
+                <div className="flex justify-between items-center px-1">
+                  <span className="text-xs font-bold text-zinc-400">
+                    {t.offer.totalAmountLabel}
+                  </span>
+                  <span className="text-sm font-heading font-black text-brand-lime">
+                    {t.offer.totalLabel.replace("{price}", currentTotalPrice)}
+                  </span>
+                </div>
+
+                {error && (
+                  <p className="text-xs text-red-500 font-semibold bg-red-500/10 p-3 rounded-xl border border-red-500/20 text-center animate-shake">
+                    {error}
+                  </p>
+                )}
+
+                <Button
+                  onClick={handleCheckout}
+                  disabled={isSubmitting}
+                  className={cn(
+                    "w-full font-heading font-bold text-xs sm:text-sm tracking-wide py-6 rounded-2xl transition-all cursor-pointer flex items-center justify-center gap-2 shadow-lg shadow-lime-400/10",
+                    isSubmitting
+                      ? "bg-zinc-800 text-zinc-500 cursor-not-allowed"
+                      : "bg-brand-lime text-zinc-950 hover:bg-brand-lime-hover"
+                  )}
+                >
+                  {isSubmitting ? (
+                    <>
+                      <Loader2 className="w-4 h-4 animate-spin text-zinc-950" />
+                      <span>{locale === "pt-br" ? "Redirecionando..." : "Redirecting to checkout..."}</span>
+                    </>
+                  ) : (
+                    <>
+                      <CreditCard className="w-4 h-4 shrink-0" />
+                      <span className="truncate">{t.offer.ctaButton.replace("{price}", currentTotalPrice)}</span>
+                    </>
+                  )}
+                </Button>
+
+                <div className="flex items-center justify-center gap-2 text-[10px] text-zinc-400 mt-0.5 select-none">
+                  <Lock className="w-3 h-3 text-brand-teal shrink-0" />
+                  <span>{t.offer.secureCheckout} • {t.offer.sslEncrypted}</span>
+                </div>
+              </div>
+
               {/* Order Bump: 5-Minute Mobility Protocol */}
               <div
                 onClick={() => setIncludeMobilityProtocol(!includeMobilityProtocol)}
                 className={cn(
-                  "w-full text-left p-4.5 rounded-2xl border transition-all cursor-pointer select-none relative flex flex-col gap-2.5",
+                  "w-full text-left p-4.5 rounded-2xl border transition-all cursor-pointer select-none relative flex flex-col gap-2.5 mt-2 md:mt-0",
                   includeMobilityProtocol
                     ? "bg-brand-lime/10 border-brand-lime shadow-md shadow-lime-400/5"
                     : "bg-zinc-900/60 border-zinc-800 hover:border-zinc-700"
@@ -503,6 +552,16 @@ export default function CheckoutPage() {
 
             {/* Botão de Compra CTA principal */}
             <div className="flex flex-col gap-2.5">
+              {/* Dynamic Total Box */}
+              <div className="flex justify-between items-center px-1 pb-0.5">
+                <span className="text-xs font-bold text-zinc-400">
+                  {t.offer.totalAmountLabel}
+                </span>
+                <span className="text-sm font-heading font-black text-brand-lime">
+                  {t.offer.totalLabel.replace("{price}", currentTotalPrice)}
+                </span>
+              </div>
+
               {error && (
                 <p className="text-xs text-red-500 font-semibold bg-red-500/10 p-3 rounded-xl border border-red-500/20 text-center animate-shake">
                   {error}
@@ -512,7 +571,7 @@ export default function CheckoutPage() {
                 onClick={handleCheckout}
                 disabled={isSubmitting}
                 className={cn(
-                  "w-full font-heading font-bold text-sm tracking-wide py-7 rounded-2xl transition-all cursor-pointer flex items-center justify-center gap-2 shadow-lg shadow-lime-400/10",
+                  "w-full font-heading font-bold text-xs sm:text-sm tracking-wide py-7 rounded-2xl transition-all cursor-pointer flex items-center justify-center gap-2 shadow-lg shadow-lime-400/10",
                   isSubmitting
                     ? "bg-zinc-800 text-zinc-500 cursor-not-allowed"
                     : "bg-brand-lime text-zinc-950 hover:bg-brand-lime-hover"
@@ -525,8 +584,8 @@ export default function CheckoutPage() {
                   </>
                 ) : (
                   <>
-                    <CreditCard className="w-4 h-4" />
-                    {t.offer.ctaButton}
+                    <CreditCard className="w-4 h-4 shrink-0" />
+                    <span>{t.offer.ctaButton.replace("{price}", currentTotalPrice)}</span>
                   </>
                 )}
               </Button>
