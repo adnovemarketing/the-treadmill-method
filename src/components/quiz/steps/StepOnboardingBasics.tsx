@@ -60,20 +60,23 @@ export function StepOnboardingBasics({ onNext }: StepProps) {
   return (
     <div className="grid grid-cols-1 md:grid-cols-12 gap-6 md:gap-8 items-center">
       {/* Coluna Esquerda: Conteúdo e Opções */}
-      <div className="md:col-span-7 flex flex-col gap-5">
+      <div className="md:col-span-7 flex flex-col gap-4 sm:gap-5">
         <div className="text-left md:text-left">
           <span className="text-[10px] tracking-widest text-brand-lime font-heading font-extrabold uppercase bg-brand-lime/10 px-3 py-1 rounded-full">
             {t.quiz.steps.onboardingBasics.badge}
           </span>
-          <h2 className="text-xl md:text-2xl font-heading font-extrabold text-zinc-50 mt-3 leading-tight uppercase">
+          <h2 className="text-xl md:text-2xl font-heading font-extrabold text-zinc-50 mt-2.5 leading-tight uppercase">
             {t.quiz.steps.onboardingBasics.title}
           </h2>
-          <p className="text-xs text-zinc-400 mt-2">
+          <p className="text-xs text-zinc-400 mt-1.5 leading-normal">
             {t.quiz.steps.onboardingBasics.subtitle}
+          </p>
+          <p className="text-[11px] sm:text-xs text-brand-lime/80 font-medium mt-2">
+            {t.quiz.steps.onboardingBasics.helperTap}
           </p>
         </div>
 
-        <div className="flex flex-col gap-3 mt-1">
+        <div className="flex flex-col gap-2.5 sm:gap-3 mt-0.5">
           {options.map((opt) => (
             <OptionCard
               key={opt.value}

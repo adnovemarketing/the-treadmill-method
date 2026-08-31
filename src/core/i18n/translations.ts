@@ -48,6 +48,7 @@ export interface TranslationSchema {
         badge: string;
         title: string;
         subtitle: string;
+        helperTap: string;
         weightLoss: { title: string; desc: string };
         cardioEndurance: { title: string; desc: string };
         consistency: { title: string; desc: string };
@@ -156,6 +157,10 @@ export interface TranslationSchema {
         weightLabel: string;
         targetWeightLabel: string;
         errorInvalid: string;
+        errorHeight: string;
+        errorHeightRange: string;
+        errorWeight: string;
+        errorWeightRange: string;
         cta: string;
       };
       importantEvent: {
@@ -367,25 +372,26 @@ export const translations: Record<Locale | 'pt-br', TranslationSchema> = {
           badge: 'STEP 1: OBJECTIVE',
           title: 'What is your main goal on the treadmill?',
           subtitle: 'Your plan will be structured around this central target.',
+          helperTap: 'Tap your main goal to begin',
           weightLoss: {
-            title: 'Sustainable Weight Loss',
-            desc: 'Focus on optimized calorie burning and fat reduction.'
+            title: 'Lose weight sustainably',
+            desc: 'Burn more through walking'
           },
           cardioEndurance: {
-            title: 'Cardio & Stamina',
-            desc: 'Increase breath capacity, aerobic endurance, and daily energy.'
+            title: 'Improve fitness & stamina',
+            desc: 'Feel fitter in everyday life'
           },
           consistency: {
-            title: 'Consistency & Habit',
-            desc: 'Build a stable routine without procrastination.'
+            title: 'Build a walking habit',
+            desc: 'Create a routine you can stick to'
           },
           stressRelief: {
-            title: 'Stress Relief',
-            desc: 'Restorative walking for mental clarity and focus.'
+            title: 'Reduce stress',
+            desc: 'Use walking to clear your head'
           },
           generalHealth: {
-            title: 'Health & Longevity',
-            desc: 'Strengthen joints and improve overall metabolic markers.'
+            title: 'Improve overall health',
+            desc: 'Move more and feel better'
           }
         },
         ageSelection: {
@@ -490,6 +496,10 @@ export const translations: Record<Locale | 'pt-br', TranslationSchema> = {
           weightLabel: 'Current Weight',
           targetWeightLabel: 'Target Weight',
           errorInvalid: 'Please enter valid, safe physical measurements.',
+          errorHeight: 'Please enter your height',
+          errorHeightRange: 'Please enter a valid height (between 3–8 ft / 100–250 cm)',
+          errorWeight: 'Please enter your current weight',
+          errorWeightRange: 'Please enter a valid weight (between 4.5–39 st / 30–250 kg)',
           cta: 'Next: Goals Timeline'
         },
         importantEvent: {
@@ -735,25 +745,26 @@ export const translations: Record<Locale | 'pt-br', TranslationSchema> = {
           badge: 'ETAPA 1: OBJETIVO',
           title: 'Qual o seu objetivo principal ao treinar na esteira?',
           subtitle: 'Seu plano será estruturado em torno desta meta central.',
+          helperTap: 'Toque no seu objetivo principal para começar',
           weightLoss: {
-            title: 'Emagrecimento Sustentável',
-            desc: 'Foco em queima calórica otimizada e redução de gordura.'
+            title: 'Emagrecimento sustentável',
+            desc: 'Queime mais calorias caminhando'
           },
           cardioEndurance: {
-            title: 'Condicionamento Físico',
-            desc: 'Aumentar fôlego, resistência aeróbica e energia diária.'
+            title: 'Mais condicionamento e fôlego',
+            desc: 'Sinta-se com mais energia no dia a dia'
           },
           consistency: {
-            title: 'Consistência e Hábito',
-            desc: 'Construir uma rotina estável sem procrastinação.'
+            title: 'Criar o hábito de caminhar',
+            desc: 'Construa uma rotina consistente'
           },
           stressRelief: {
-            title: 'Alívio de Estresse',
-            desc: 'Caminhadas restauradoras para clareza mental e foco.'
+            title: 'Reduzir estresse e ansiedade',
+            desc: 'Use a caminhada para clarear a mente'
           },
           generalHealth: {
-            title: 'Saúde & Longevidade',
-            desc: 'Fortalecer articulações e melhorar índices metabólicos.'
+            title: 'Melhorar a saúde geral',
+            desc: 'Movimente-se mais e viva melhor'
           }
         },
         ageSelection: {
@@ -858,6 +869,10 @@ export const translations: Record<Locale | 'pt-br', TranslationSchema> = {
           weightLabel: 'Peso Atual',
           targetWeightLabel: 'Peso Meta',
           errorInvalid: 'Por favor, preencha valores físicos válidos e seguros.',
+          errorHeight: 'Por favor, informe sua altura',
+          errorHeightRange: 'Por favor, informe uma altura válida (entre 100 e 250 cm / 3–8 ft)',
+          errorWeight: 'Por favor, informe seu peso atual',
+          errorWeightRange: 'Por favor, informe um peso válido (entre 30 e 250 kg / 4.5–39 st)',
           cta: 'Avançar para Data Meta'
         },
         importantEvent: {

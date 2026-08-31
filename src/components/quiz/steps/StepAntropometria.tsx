@@ -77,7 +77,6 @@ export function StepAntropometria({ onNext }: StepProps) {
 
   const initialH = initHeightInches();
   const initialW = initWeightValues(data.weight);
-  const initialTW = initWeightValues(data.targetWeight);
 
   // Height state
   const [heightFeet, setHeightFeet] = useState<string>(initialH.ft);
@@ -89,12 +88,6 @@ export function StepAntropometria({ onNext }: StepProps) {
   const [weightLbs, setWeightLbs] = useState<string>(initialW.lbs);
   const [weightSt, setWeightSt] = useState<string>(initialW.st);
   const [weightStLbs, setWeightStLbs] = useState<string>(initialW.stLbs);
-
-  // Target Weight state
-  const [targetWeightKg, setTargetWeightKg] = useState<string>(initialTW.kg);
-  const [targetWeightLbs, setTargetWeightLbs] = useState<string>(initialTW.lbs);
-  const [targetWeightSt, setTargetWeightSt] = useState<string>(initialTW.st);
-  const [targetWeightStLbs, setTargetWeightStLbs] = useState<string>(initialTW.stLbs);
 
   const [error, setError] = useState<string | null>(null);
 
@@ -132,75 +125,82 @@ export function StepAntropometria({ onNext }: StepProps) {
       currentLbs = Math.round(parseFloat(weightLbs) || 0);
     }
 
-    let targetLbs = 0;
-    if (weightUnitMode === "kg") {
-      targetLbs = Math.round((parseFloat(targetWeightKg) || 0) * 2.20462);
-    } else if (weightUnitMode === "st_lbs") {
-      targetLbs = (parseFloat(targetWeightSt) || 0) * 14 + (parseFloat(targetWeightStLbs) || 0);
-    } else {
-      targetLbs = Math.round(parseFloat(targetWeightLbs) || 0);
-    }
-
     // Convert to target view
     if (newMode === "kg") {
       const wKg = Math.round(currentLbs / 2.20462);
-      const tKg = Math.round(targetLbs / 2.20462);
       setWeightKg(wKg > 0 ? String(wKg) : "");
-      setTargetWeightKg(tKg > 0 ? String(tKg) : "");
     } else if (newMode === "st_lbs") {
       const wSt = Math.floor(currentLbs / 14);
       const wL = currentLbs % 14;
-      const tSt = Math.floor(targetLbs / 14);
-      const tL = targetLbs % 14;
       setWeightSt(wSt > 0 ? String(wSt) : "");
       setWeightStLbs(currentLbs > 0 ? String(wL) : "");
-      setTargetWeightSt(tSt > 0 ? String(tSt) : "");
-      setTargetWeightStLbs(targetLbs > 0 ? String(tL) : "");
     } else {
       setWeightLbs(currentLbs > 0 ? String(currentLbs) : "");
-      setTargetWeightLbs(targetLbs > 0 ? String(targetLbs) : "");
     }
 
     setWeightUnitMode(newMode);
   };
 
-  const isValid = () => {
+  const validateInputs = (): string | null => {
     // Validar Altura
     if (heightUnit === "cm") {
+      if (!heightCm.trim()) {
+        return t.quiz.steps.antropometria.errorHeight;
+      }
       const hVal = parseFloat(heightCm);
-      if (isNaN(hVal) || hVal < 100 || hVal > 250) return false;
+      if (isNaN(hVal) || hVal < 100 || hVal > 250) {
+        return t.quiz.steps.antropometria.errorHeightRange;
+      }
     } else {
+      if (!heightFeet.trim()) {
+        return t.quiz.steps.antropometria.errorHeight;
+      }
       const fVal = parseFloat(heightFeet);
       const iVal = parseFloat(heightInches) || 0;
-      if (isNaN(fVal) || fVal < 3 || fVal > 8 || iVal < 0 || iVal >= 12) return false;
+      if (isNaN(fVal) || fVal < 3 || fVal > 8 || iVal < 0 || iVal >= 12) {
+        return t.quiz.steps.antropometria.errorHeightRange;
+      }
     }
 
-    // Validar Pesos
+    // Validar Peso Atual
     if (weightUnitMode === "kg") {
+      if (!weightKg.trim()) {
+        return t.quiz.steps.antropometria.errorWeight;
+      }
       const wVal = parseFloat(weightKg);
-      const tVal = parseFloat(targetWeightKg);
-      if (isNaN(wVal) || isNaN(tVal) || wVal < 30 || wVal > 250 || tVal < 30 || tVal > 250) return false;
+      if (isNaN(wVal) || wVal < 30 || wVal > 250) {
+        return t.quiz.steps.antropometria.errorWeightRange;
+      }
     } else if (weightUnitMode === "st_lbs") {
+      if (!weightSt.trim()) {
+        return t.quiz.steps.antropometria.errorWeight;
+      }
       const wSt = parseFloat(weightSt);
       const wIb = parseFloat(weightStLbs) || 0;
-      const tSt = parseFloat(targetWeightSt);
-      const tIb = parseFloat(targetWeightStLbs) || 0;
-      if (isNaN(wSt) || isNaN(tSt)) return false;
+      if (isNaN(wSt)) {
+        return t.quiz.steps.antropometria.errorWeight;
+      }
       const wTotal = wSt * 14 + wIb;
-      const tTotal = tSt * 14 + tIb;
-      if (wTotal < 65 || wTotal > 550 || tTotal < 65 || tTotal > 550) return false;
+      if (wTotal < 65 || wTotal > 550 || wIb < 0 || wIb >= 14) {
+        return t.quiz.steps.antropometria.errorWeightRange;
+      }
     } else {
+      if (!weightLbs.trim()) {
+        return t.quiz.steps.antropometria.errorWeight;
+      }
       const wVal = parseFloat(weightLbs);
-      const tVal = parseFloat(targetWeightLbs);
-      if (isNaN(wVal) || isNaN(tVal) || wVal < 65 || wVal > 550 || tVal < 65 || tVal > 550) return false;
+      if (isNaN(wVal) || wVal < 65 || wVal > 550) {
+        return t.quiz.steps.antropometria.errorWeightRange;
+      }
     }
 
-    return true;
+    return null;
   };
 
   const handleNext = () => {
-    if (!isValid()) {
-      setError(t.quiz.steps.antropometria.errorInvalid);
+    const validationError = validateInputs();
+    if (validationError) {
+      setError(validationError);
       return;
     }
 
@@ -219,24 +219,18 @@ export function StepAntropometria({ onNext }: StepProps) {
     }
 
     let finalWeight: number;
-    let finalTargetWeight: number;
     let finalWeightUnit: "kg" | "lb";
 
     if (weightUnitMode === "kg") {
       finalWeight = parseFloat(weightKg);
-      finalTargetWeight = parseFloat(targetWeightKg);
       finalWeightUnit = "kg";
     } else if (weightUnitMode === "st_lbs") {
       const wSt = parseFloat(weightSt) || 0;
       const wIb = parseFloat(weightStLbs) || 0;
-      const tSt = parseFloat(targetWeightSt) || 0;
-      const tIb = parseFloat(targetWeightStLbs) || 0;
       finalWeight = wSt * 14 + wIb;
-      finalTargetWeight = tSt * 14 + tIb;
       finalWeightUnit = "lb";
     } else {
       finalWeight = parseFloat(weightLbs);
-      finalTargetWeight = parseFloat(targetWeightLbs);
       finalWeightUnit = "lb";
     }
 
@@ -245,7 +239,6 @@ export function StepAntropometria({ onNext }: StepProps) {
       weightUnit: finalWeightUnit,
       height: finalHeight,
       weight: finalWeight,
-      targetWeight: finalTargetWeight,
     });
 
     onNext("important-event");
@@ -306,7 +299,7 @@ export function StepAntropometria({ onNext }: StepProps) {
                   if (error) setError(null);
                 }}
                 placeholder="170"
-                className="w-full bg-zinc-950 border border-zinc-800 focus:border-brand-lime rounded-xl px-4 py-3.5 text-sm text-zinc-100 placeholder:text-zinc-700 focus:outline-none transition-colors animate-[fadeIn_0.3s_ease]"
+                className="w-full bg-zinc-950 border border-zinc-800 focus:border-brand-lime rounded-xl px-4 py-3.5 text-base md:text-sm text-zinc-100 placeholder:text-zinc-700 focus:outline-none transition-colors animate-[fadeIn_0.3s_ease]"
               />
             ) : (
               <div className="grid grid-cols-2 gap-3 animate-[fadeIn_0.3s_ease]">
@@ -322,7 +315,7 @@ export function StepAntropometria({ onNext }: StepProps) {
                       if (error) setError(null);
                     }}
                     placeholder="5"
-                    className="w-full bg-zinc-950 border border-zinc-800 focus:border-brand-lime rounded-xl pl-4 pr-9 py-3.5 text-sm text-zinc-100 placeholder:text-zinc-700 focus:outline-none transition-colors"
+                    className="w-full bg-zinc-950 border border-zinc-800 focus:border-brand-lime rounded-xl pl-4 pr-9 py-3.5 text-base md:text-sm text-zinc-100 placeholder:text-zinc-700 focus:outline-none transition-colors"
                   />
                   <span className="absolute right-3.5 top-1/2 -translate-y-1/2 text-xs font-bold text-zinc-500 pointer-events-none">ft</span>
                 </div>
@@ -338,7 +331,7 @@ export function StepAntropometria({ onNext }: StepProps) {
                       if (error) setError(null);
                     }}
                     placeholder="7"
-                    className="w-full bg-zinc-950 border border-zinc-800 focus:border-brand-lime rounded-xl pl-4 pr-9 py-3.5 text-sm text-zinc-100 placeholder:text-zinc-700 focus:outline-none transition-colors"
+                    className="w-full bg-zinc-950 border border-zinc-800 focus:border-brand-lime rounded-xl pl-4 pr-9 py-3.5 text-base md:text-sm text-zinc-100 placeholder:text-zinc-700 focus:outline-none transition-colors"
                   />
                   <span className="absolute right-3.5 top-1/2 -translate-y-1/2 text-xs font-bold text-zinc-500 pointer-events-none">in</span>
                 </div>
@@ -394,7 +387,7 @@ export function StepAntropometria({ onNext }: StepProps) {
                   if (error) setError(null);
                 }}
                 placeholder="75"
-                className="w-full bg-zinc-950 border border-zinc-800 focus:border-brand-lime rounded-xl px-4 py-3.5 text-sm text-zinc-100 placeholder:text-zinc-700 focus:outline-none transition-colors"
+                className="w-full bg-zinc-950 border border-zinc-800 focus:border-brand-lime rounded-xl px-4 py-3.5 text-base md:text-sm text-zinc-100 placeholder:text-zinc-700 focus:outline-none transition-colors"
               />
             ) : weightUnitMode === "st_lbs" ? (
               <div className="grid grid-cols-2 gap-3 animate-[fadeIn_0.3s_ease]">
@@ -408,7 +401,7 @@ export function StepAntropometria({ onNext }: StepProps) {
                       if (error) setError(null);
                     }}
                     placeholder="11"
-                    className="w-full bg-zinc-950 border border-zinc-800 focus:border-brand-lime rounded-xl pl-4 pr-9 py-3.5 text-sm text-zinc-100 placeholder:text-zinc-700 focus:outline-none transition-colors"
+                    className="w-full bg-zinc-950 border border-zinc-800 focus:border-brand-lime rounded-xl pl-4 pr-9 py-3.5 text-base md:text-sm text-zinc-100 placeholder:text-zinc-700 focus:outline-none transition-colors"
                   />
                   <span className="absolute right-3.5 top-1/2 -translate-y-1/2 text-xs font-bold text-zinc-500 pointer-events-none">st</span>
                 </div>
@@ -424,7 +417,7 @@ export function StepAntropometria({ onNext }: StepProps) {
                       if (error) setError(null);
                     }}
                     placeholder="11"
-                    className="w-full bg-zinc-950 border border-zinc-800 focus:border-brand-lime rounded-xl pl-4 pr-9 py-3.5 text-sm text-zinc-100 placeholder:text-zinc-700 focus:outline-none transition-colors"
+                    className="w-full bg-zinc-950 border border-zinc-800 focus:border-brand-lime rounded-xl pl-4 pr-9 py-3.5 text-base md:text-sm text-zinc-100 placeholder:text-zinc-700 focus:outline-none transition-colors"
                   />
                   <span className="absolute right-3.5 top-1/2 -translate-y-1/2 text-xs font-bold text-zinc-500 pointer-events-none">lbs</span>
                 </div>
@@ -439,76 +432,7 @@ export function StepAntropometria({ onNext }: StepProps) {
                   if (error) setError(null);
                 }}
                 placeholder="165"
-                className="w-full bg-zinc-950 border border-zinc-800 focus:border-brand-lime rounded-xl px-4 py-3.5 text-sm text-zinc-100 placeholder:text-zinc-700 focus:outline-none transition-colors"
-              />
-            )}
-          </div>
-
-          {/* Peso Meta */}
-          <div className="flex flex-col gap-1.5">
-            <div className="flex justify-between items-center px-1">
-              <label className="text-xs font-semibold text-zinc-300">{t.quiz.steps.antropometria.targetWeightLabel}</label>
-              <span className="text-[9px] font-bold text-zinc-600 uppercase tracking-wide">
-                {weightUnitMode === "kg" ? "KG" : weightUnitMode === "st_lbs" ? "ST / LBS" : "LBS"}
-              </span>
-            </div>
-
-            {weightUnitMode === "kg" ? (
-              <input
-                type="number"
-                step="any"
-                value={targetWeightKg}
-                onChange={(e) => {
-                  setTargetWeightKg(e.target.value);
-                  if (error) setError(null);
-                }}
-                placeholder="68"
-                className="w-full bg-zinc-950 border border-zinc-800 focus:border-brand-lime rounded-xl px-4 py-3.5 text-sm text-zinc-100 placeholder:text-zinc-700 focus:outline-none transition-colors"
-              />
-            ) : weightUnitMode === "st_lbs" ? (
-              <div className="grid grid-cols-2 gap-3 animate-[fadeIn_0.3s_ease]">
-                <div className="relative">
-                  <input
-                    type="number"
-                    step="1"
-                    value={targetWeightSt}
-                    onChange={(e) => {
-                      setTargetWeightSt(e.target.value);
-                      if (error) setError(null);
-                    }}
-                    placeholder="10"
-                    className="w-full bg-zinc-950 border border-zinc-800 focus:border-brand-lime rounded-xl pl-4 pr-9 py-3.5 text-sm text-zinc-100 placeholder:text-zinc-700 focus:outline-none transition-colors"
-                  />
-                  <span className="absolute right-3.5 top-1/2 -translate-y-1/2 text-xs font-bold text-zinc-500 pointer-events-none">st</span>
-                </div>
-                <div className="relative">
-                  <input
-                    type="number"
-                    step="1"
-                    min="0"
-                    max="13"
-                    value={targetWeightStLbs}
-                    onChange={(e) => {
-                      setTargetWeightStLbs(e.target.value);
-                      if (error) setError(null);
-                    }}
-                    placeholder="10"
-                    className="w-full bg-zinc-950 border border-zinc-800 focus:border-brand-lime rounded-xl pl-4 pr-9 py-3.5 text-sm text-zinc-100 placeholder:text-zinc-700 focus:outline-none transition-colors"
-                  />
-                  <span className="absolute right-3.5 top-1/2 -translate-y-1/2 text-xs font-bold text-zinc-500 pointer-events-none">lbs</span>
-                </div>
-              </div>
-            ) : (
-              <input
-                type="number"
-                step="any"
-                value={targetWeightLbs}
-                onChange={(e) => {
-                  setTargetWeightLbs(e.target.value);
-                  if (error) setError(null);
-                }}
-                placeholder="150"
-                className="w-full bg-zinc-950 border border-zinc-800 focus:border-brand-lime rounded-xl px-4 py-3.5 text-sm text-zinc-100 placeholder:text-zinc-700 focus:outline-none transition-colors"
+                className="w-full bg-zinc-950 border border-zinc-800 focus:border-brand-lime rounded-xl px-4 py-3.5 text-base md:text-sm text-zinc-100 placeholder:text-zinc-700 focus:outline-none transition-colors"
               />
             )}
           </div>

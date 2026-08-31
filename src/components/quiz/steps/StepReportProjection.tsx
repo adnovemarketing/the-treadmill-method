@@ -27,7 +27,7 @@ export function StepReportProjection({ onNext }: StepProps) {
   }, [locale]);
 
   const cWeight = data.weight || 75;
-  const tWeight = data.targetWeight || 68;
+  const tWeight = data.targetWeight;
   const unit = data.weightUnit || "kg";
 
   const { dateString, weeks } = calculateTargetDate(cWeight, tWeight, unit, locale);
@@ -37,10 +37,12 @@ export function StepReportProjection({ onNext }: StepProps) {
   const imcCatColor = getIMCCategoryColor(imcCatKey);
   const imcCatLabel = t.report[imcCatKey];
 
-  // Geração de pontos para um gráfico SVG suave de queda de peso
+  // Geração de pontos para um gráfico SVG suave de evolução
   const startWeight = cWeight;
-  const endWeight = tWeight;
-  const midWeight = parseFloat(((startWeight + endWeight) / 2 + 1.5).toFixed(1));
+  const endWeight = tWeight || startWeight;
+  const midWeight = tWeight
+    ? parseFloat(((startWeight + endWeight) / 2 + 1.5).toFixed(1))
+    : startWeight;
 
   return (
     <div className="flex flex-col lg:flex-row gap-6 lg:gap-8 items-start">
@@ -60,9 +62,15 @@ export function StepReportProjection({ onNext }: StepProps) {
 
         {/* Box de Resumo da Meta */}
         <div className="bg-zinc-950 border border-zinc-800 p-5 rounded-2xl flex flex-col gap-4 text-center">
-          <p className="text-xs font-semibold text-zinc-400">
-            {locale === "pt-br" ? "Chegue aos" : "Reach"} <span className="text-zinc-50 font-bold">{tWeight} {unit}</span> {locale === "pt-br" ? "até" : "by"}:
-          </p>
+          {tWeight ? (
+            <p className="text-xs font-semibold text-zinc-400">
+              {locale === "pt-br" ? "Chegue aos" : "Reach"} <span className="text-zinc-50 font-bold">{tWeight} {unit}</span> {locale === "pt-br" ? "até" : "by"}:
+            </p>
+          ) : (
+            <p className="text-xs font-semibold text-zinc-400">
+              {locale === "pt-br" ? "Estimativa do seu primeiro ciclo de resultados:" : "Estimated timeline for your initial progress milestone:"}
+            </p>
+          )}
           <h3 className="text-lg md:text-xl font-heading font-black text-brand-lime tracking-wide">
             {dateString}
           </h3>
@@ -118,12 +126,16 @@ export function StepReportProjection({ onNext }: StepProps) {
                 <span className="text-zinc-300">{startWeight} {unit}</span>
               </div>
               <div className="flex flex-col items-center">
-                <span>{locale === "pt-br" ? "METADE" : "MIDPOINT"}</span>
-                <span className="text-zinc-300">{midWeight} {unit}</span>
+                <span>{locale === "pt-br" ? "FASE 1" : "PHASE 1"}</span>
+                <span className="text-zinc-300">
+                  {tWeight ? `${midWeight} ${unit}` : (locale === "pt-br" ? "Adaptação" : "Adaptation")}
+                </span>
               </div>
               <div className="flex flex-col items-end">
                 <span>{locale === "pt-br" ? "META" : "TARGET"}</span>
-                <span className="text-brand-lime font-black">{endWeight} {unit}</span>
+                <span className="text-brand-lime font-black">
+                  {tWeight ? `${endWeight} ${unit}` : (locale === "pt-br" ? "Consistência" : "Consistency")}
+                </span>
               </div>
             </div>
           </div>
