@@ -121,8 +121,8 @@ export function StepEmailCapture() {
             </h2>
             <p className="text-xs text-zinc-400 max-w-xs mx-auto mt-1 leading-normal">
               {isPtBr
-                ? "Calculando métricas biológicas e estruturando calendário de 4 semanas..."
-                : "Calculating biological metrics and structuring your 4-week calendar..."}
+                ? "Calculando métricas biológicas e estruturando seu roteiro de 21 dias..."
+                : "Calculating biological metrics and structuring your 21-day roadmap..."}
             </p>
           </div>
         </div>

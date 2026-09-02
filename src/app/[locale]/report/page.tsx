@@ -21,6 +21,9 @@ import {
 import { cn } from "@/lib/utils";
 import { trackEvent, sendQuizAnalyticsEvent } from "@/core/utils/analytics";
 import { CRO_FLAGS } from "@/config/flags";
+import { generatePersonalisedPlan, getPersonalisedPlanDisplayLabels } from "@/core/personalisation/engine";
+import { PROGRAMME_LIBRARY } from "@/core/programmes/library";
+import { PersonalisationProofSection } from "@/components/report/PersonalisationProofSection";
 import { ProductPreviewSection } from "@/components/report/ProductPreviewSection";
 
 export default function ReportPage() {
@@ -28,6 +31,7 @@ export default function ReportPage() {
   const router = useRouter();
   const params = useParams();
   const locale = (params.locale as string) || "en-gb";
+  const isPtBr = locale.toLowerCase() === "pt-br";
   const t = useTranslations(locale);
   const config = getMarketConfig(locale);
   const singlePrice = formatCurrency(config.prices.single, locale);
@@ -84,54 +88,83 @@ export default function ReportPage() {
     }
   };
 
-  // Determinar o plano de treino adequado
-  const getPlanDetails = () => {
-    const hasSensitivities =
-      data.jointSensitivities.knees ||
-      data.jointSensitivities.ankles ||
-      data.jointSensitivities.lowerBack;
+  // Motor Central de Personalização (Fonte Única de Verdade)
+  const personalisedPlan = generatePersonalisedPlan(data);
+  const labels = getPersonalisedPlanDisplayLabels(personalisedPlan, locale);
+  const programmeDef = PROGRAMME_LIBRARY[personalisedPlan.programme];
 
-    const wl = t.report.weeksList;
-
-    if (hasSensitivities) {
-      return {
-        name: t.report.activeRecoveryName,
-        description: t.report.activeRecoveryDesc,
-        weeks: [
-          { week: `${wl.week} 1`, focus: wl.w1Focus, detail: wl.w1Detail },
-          { week: `${wl.week} 2`, focus: wl.w2Focus, detail: wl.w2Detail },
-          { week: `${wl.week} 3`, focus: wl.w3Focus, detail: wl.w3Detail },
-          { week: `${wl.week} 4`, focus: wl.w4Focus, detail: wl.w4Detail },
-        ],
-      };
-    }
-
-    if (data.hasInclineAccess && (data.cardioFitnessLevel === "intermediate" || data.cardioFitnessLevel === "advanced")) {
-      return {
-        name: t.report.inclineHiitName,
-        description: t.report.inclineHiitDesc,
-        weeks: [
-          { week: `${wl.week} 1`, focus: locale === "pt-br" ? "Resistência de Inclinação" : "Incline Resistance", detail: locale === "pt-br" ? "20 min. Caminhada a 5.0 km/h alternando 2% e 5% de inclinação a cada 3 min." : "20 min. Alternate 2% and 5% incline every 3 min at 5.0 km/h." },
-          { week: `${wl.week} 2`, focus: locale === "pt-br" ? "Pirâmide de Força" : "Strength Pyramid", detail: locale === "pt-br" ? "25 min. Inclinação subindo 1% a cada 2 min (máximo 7%), velocidade 4.5 km/h." : "25 min. Incline climbs 1% every 2 min (max 7%) at 4.5 km/h." },
-          { week: `${wl.week} 3`, focus: locale === "pt-br" ? "Método 3-2-1 Incline" : "3-2-1 Incline Method", detail: locale === "pt-br" ? "30 min. Repetições de 3 min plano, 2 min a 6% de inclinação, 1 min a 9% de inclinação." : "30 min. Reps of 3 min flat, 2 min at 6% incline, 1 min at 9% incline." },
-          { week: `${wl.week} 4`, focus: locale === "pt-br" ? "Escalada Metabólica" : "Metabolic Climb", detail: locale === "pt-br" ? "35 min. 10 min de aquecimento, seguido de subida contínua a 8% por 15 min, velocidade estável." : "35 min. 10 min warm-up, followed by continuous 8% climb for 15 min at steady speed." },
-        ],
-      };
-    }
-
-    return {
-      name: t.report.paceBuilderName,
-      description: t.report.paceBuilderDesc,
-      weeks: [
-        { week: `${wl.week} 1`, focus: locale === "pt-br" ? "Caminhada de Base" : "Base Walk", detail: locale === "pt-br" ? "20 min alternados entre ritmo lento (4.2 km/h) e ritmo firme (5.2 km/h)." : "20 min alternated between slow (4.2 km/h) and firm (5.2 km/h) pacing." },
-        { week: `${wl.week} 2`, focus: locale === "pt-br" ? "Intervalados Curtos" : "Short Intervals", detail: locale === "pt-br" ? "25 min. Alternar 1 min rápido (6.0 km/h) por 1 min de recuperação ativa (4.5 km/h)." : "25 min. Alternate 1 min fast (6.0 km/h) with 1 min recovery (4.5 km/h)." },
-        { week: `${wl.week} 3`, focus: locale === "pt-br" ? "Ritmo de Endurance" : "Endurance Rhythm", detail: locale === "pt-br" ? "30 min de caminhada constante a 5.2 km/h com acelerações na metade do treino." : "30 min steady walking at 5.2 km/h with short bursts in the middle." },
-        { week: `${wl.week} 4`, focus: locale === "pt-br" ? "Pico Cardiovascular" : "Cardiovascular Peak", detail: locale === "pt-br" ? "35 min alternando blocos de 5 min a 5.5 km/h e 2 min de recuperação a 4.0 km/h." : "35 min alternating 5 min blocks at 5.5 km/h and 2 min recovery at 4.0 km/h." },
-      ],
-    };
-  };
-
-  const plan = getPlanDetails();
+  // Roteiro Factual de 21 Dias (3 Semanas / 9 Sessões) correspondente ao programa
+  const programmeSyllabus = {
+    gentle_start: [
+      {
+        week: isPtBr ? "Semana 1" : "Week 1",
+        focus: isPtBr ? "Comece a Movimentar" : "Just Get Moving",
+        detail: isPtBr
+          ? "3 sessões orientadas (10–15 min) com foco em postura, ritmo confortável e proteção articular."
+          : "3 guided sessions (10–15 min) focused on posture, easy rhythm and joint protection.",
+      },
+      {
+        week: isPtBr ? "Semana 2" : "Week 2",
+        focus: isPtBr ? "Construção de Consistência" : "Build Consistency",
+        detail: isPtBr
+          ? "3 sessões orientadas (15–20 min) com progressão suave de tempo para consolidar o hábito."
+          : "3 guided sessions (15–20 min) with gradual duration increases to build consistency.",
+      },
+      {
+        week: isPtBr ? "Semana 3" : "Week 3",
+        focus: isPtBr ? "Confiança e Resistência" : "Build Confidence",
+        detail: isPtBr
+          ? "3 sessões orientadas (20–25 min) culminando no marco de caminhada de 21 dias."
+          : "3 guided sessions (20–25 min) reaching your 21-day capstone foundation milestone.",
+      },
+    ],
+    progressive_incline: [
+      {
+        week: isPtBr ? "Semana 1" : "Week 1",
+        focus: isPtBr ? "Introdução à Inclinação" : "Introduce Incline",
+        detail: isPtBr
+          ? "3 sessões orientadas (20–25 min) introduzindo blocos suaves de inclinação na esteira."
+          : "3 guided sessions (20–25 min) introducing gentle incline walking blocks.",
+      },
+      {
+        week: isPtBr ? "Semana 2" : "Week 2",
+        focus: isPtBr ? "Ondas de Resistência" : "Incline Stamina",
+        detail: isPtBr
+          ? "3 sessões orientadas (22–25 min) alternando ondas de inclinação e recuperação plana."
+          : "3 guided sessions (22–25 min) alternating incline waves and flat recovery.",
+      },
+      {
+        week: isPtBr ? "Semana 3" : "Week 3",
+        focus: isPtBr ? "Integração e Eficiência" : "Incline Integration",
+        detail: isPtBr
+          ? "3 sessões orientadas (25–30 min) elevando gasto calórico com velocidade controlada."
+          : "3 guided sessions (25–30 min) elevating caloric burn with controlled safe speed.",
+      },
+    ],
+    pace_builder: [
+      {
+        week: isPtBr ? "Semana 1" : "Week 1",
+        focus: isPtBr ? "Encontre seu Ritmo" : "Find Your Rhythm",
+        detail: isPtBr
+          ? "3 sessões orientadas (15–20 min) estabelecendo cadência base e blocos confortáveis."
+          : "3 guided sessions (15–20 min) setting baseline cadence and comfortable tempo.",
+      },
+      {
+        week: isPtBr ? "Semana 2" : "Week 2",
+        focus: isPtBr ? "Desenvolvimento de Ritmo" : "Build Your Pace",
+        detail: isPtBr
+          ? "3 sessões orientadas (20–25 min) introduzindo intervalos progressivos na esteira plana."
+          : "3 guided sessions (20–25 min) introducing progressive interval walking blocks.",
+      },
+      {
+        week: isPtBr ? "Semana 3" : "Week 3",
+        focus: isPtBr ? "Pico Cardiovascular" : "Consolidate Conditioning",
+        detail: isPtBr
+          ? "3 sessões orientadas (25–30 min) consolidando seu novo condicionamento de 21 dias."
+          : "3 guided sessions (25–30 min) reaching your 21-day conditioning capstone.",
+      },
+    ],
+  }[personalisedPlan.programme];
 
   return (
     <div className="min-h-screen bg-zinc-950 text-zinc-50 flex flex-col pb-12">
@@ -274,17 +307,19 @@ export default function ReportPage() {
           </div>
         )}
 
-        {/* Grade Curricular do Plano de 4 Semanas */}
+        {/* Grade Curricular do Programa de 21 Dias */}
         <div className="bg-zinc-900/20 border border-zinc-900 p-5 rounded-3xl flex flex-col gap-4 relative overflow-hidden">
           <div className="absolute top-0 right-0 w-32 h-32 bg-brand-teal/5 rounded-full blur-3xl pointer-events-none" />
           
           <div>
-            <span className="text-[9px] font-bold text-brand-teal uppercase tracking-widest block">{t.report.planTitle}</span>
+            <span className="text-[9px] font-bold text-brand-teal uppercase tracking-widest block">
+              {isPtBr ? "ROTEIRO DE 21 DIAS · 3 SEMANAS · 9 SESSÕES" : "21-DAY PROGRAMME · 3 WEEKS · 9 SESSIONS"}
+            </span>
             <h2 className="text-lg font-heading font-extrabold text-zinc-50 mt-1">
-              {plan.name}
+              {labels.programmeLabel}
             </h2>
             <p className="text-[11px] text-zinc-400 mt-1 leading-normal">
-              {plan.description}
+              {programmeDef.description}
             </p>
           </div>
 
@@ -292,7 +327,7 @@ export default function ReportPage() {
           <div className="w-full h-72 relative rounded-2xl overflow-hidden border border-zinc-900/80 mt-1 bg-zinc-950">
             <Image
               src="/assets/characters/sarah/after/sarah-after.png"
-              alt={locale === "pt-br" ? `Ilustração do treino ${plan.name}` : `Illustration of the ${plan.name} treadmill plan`}
+              alt={locale === "pt-br" ? `Ilustração do treino ${labels.programmeLabel}` : `Illustration of the ${labels.programmeLabel} treadmill plan`}
               fill
               sizes="(max-width: 768px) 100vw, 512px"
               className="object-contain object-bottom"
@@ -345,7 +380,7 @@ export default function ReportPage() {
             <div className="absolute left-7 top-6 bottom-6 w-0.5 bg-gradient-to-b from-brand-lime via-brand-teal to-zinc-900 pointer-events-none" />
 
             {/* Cards de Semana */}
-            {plan.weeks.map((wk, idx) => (
+            {programmeSyllabus.map((wk, idx) => (
               <div key={idx} className="bg-zinc-950 border border-zinc-900/80 p-4 rounded-2xl flex gap-4 relative z-10 transition-all hover:bg-zinc-900/40 hover:-translate-x-1 duration-200">
                 <div className="w-10 h-10 rounded-xl bg-zinc-900 flex flex-col items-center justify-center shrink-0 border border-zinc-800 text-[10px] font-heading font-black text-brand-lime shadow-inner shadow-lime-500/5">
                   <span>{locale === "pt-br" ? "S" : "W"}</span>
@@ -386,6 +421,12 @@ export default function ReportPage() {
             })}
           </ul>
         </div>
+
+        {/* Seção de Prova Real de Personalização */}
+        <PersonalisationProofSection
+          locale={locale}
+          labels={labels}
+        />
 
         {/* Seção de Demonstração Tangível do Produto (Real Member Area Preview) */}
         <ProductPreviewSection
