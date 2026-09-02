@@ -18,21 +18,30 @@ interface PreviewImageCardProps {
   alt: string;
   aspectClass?: string;
   caption?: string;
+  imageClassName?: string;
+  containerBgClass?: string;
 }
 
-function PreviewImageCard({ src, alt, aspectClass = "aspect-[16/10]", caption }: PreviewImageCardProps) {
+function PreviewImageCard({
+  src,
+  alt,
+  aspectClass = "aspect-[16/10]",
+  caption,
+  imageClassName = "object-cover object-top",
+  containerBgClass = "bg-zinc-950",
+}: PreviewImageCardProps) {
   const [hasError, setHasError] = useState(false);
 
   return (
     <div className="w-full flex flex-col gap-1.5">
-      <div className={`w-full ${aspectClass} relative rounded-2xl overflow-hidden bg-zinc-900 border border-zinc-800 shadow-xl shadow-black/40`}>
+      <div className={`w-full ${aspectClass} relative rounded-2xl overflow-hidden ${containerBgClass} border border-zinc-800 shadow-xl shadow-black/40 flex items-center justify-center`}>
         {!hasError ? (
           <Image
             src={src}
             alt={alt}
             fill
             sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 640px"
-            className="object-cover object-top transition-opacity duration-300"
+            className={`${imageClassName} transition-opacity duration-300`}
             onError={() => setHasError(true)}
           />
         ) : (
@@ -150,13 +159,15 @@ export function ProductPreviewSection({
           <PreviewImageCard
             src="/assets/product-preview/product-preview-home.webp"
             alt="The Treadmill Method today's walk dashboard"
-            aspectClass="aspect-[16/10] sm:aspect-[4/3]"
+            aspectClass="aspect-[16/10]"
+            imageClassName="object-contain object-center"
             caption={isPtBr ? "1. Painel diário: Treino de Hoje" : "1. Daily view: Today's Walk"}
           />
           <PreviewImageCard
             src="/assets/product-preview/product-preview-journey.webp"
             alt="The Treadmill Method 21-day journey roadmap"
-            aspectClass="aspect-[16/10] sm:aspect-[4/3]"
+            aspectClass="aspect-[16/10]"
+            imageClassName="object-contain object-center"
             caption={isPtBr ? "2. Grade completa dos 21 Dias" : "2. Full 21-Day roadmap"}
           />
         </div>
@@ -251,6 +262,7 @@ export function ProductPreviewSection({
           src="/assets/product-preview/product-preview-strategy.webp"
           alt="The Treadmill Method personal consistency strategy guide"
           aspectClass="aspect-[16/10] sm:aspect-[16/9]"
+          imageClassName="object-contain object-center"
         />
 
         {/* Supporting items */}
