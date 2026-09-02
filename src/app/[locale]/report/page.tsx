@@ -21,6 +21,7 @@ import {
 import { cn } from "@/lib/utils";
 import { trackEvent, sendQuizAnalyticsEvent } from "@/core/utils/analytics";
 import { CRO_FLAGS } from "@/config/flags";
+import { ProductPreviewSection } from "@/components/report/ProductPreviewSection";
 
 export default function ReportPage() {
   const { data } = useQuizStore();
@@ -386,41 +387,25 @@ export default function ReportPage() {
           </ul>
         </div>
 
-        {/* Chamada de Conversão CTA */}
-        <div className="bg-brand-lime/10 border border-brand-lime/20 p-5 md:p-6 rounded-3xl text-center flex flex-col gap-4 mt-2">
-          <div>
-            <h3 className="text-base font-heading font-extrabold text-zinc-100">
-              {t.report.ctaCardTitle}
-            </h3>
-            <p className="text-[11px] text-zinc-400 mt-1 leading-relaxed">
-              {t.report.ctaCardDesc}
-            </p>
-          </div>
-
-          <div className="flex flex-col items-center gap-2 w-full">
-            <Button
-              onClick={() => {
-                trackEvent("checkout_clicked", { source: "report_bottom_cta", locale });
-                const sessionId = useQuizStore.getState().sessionId;
-                if (sessionId) {
-                  sendQuizAnalyticsEvent({
-                    sessionId,
-                    eventType: "offer_cta_clicked",
-                    payload: { source: "report_bottom_cta", locale },
-                  });
-                }
-                router.push(`/${locale}/checkout`);
-              }}
-              className="w-full bg-brand-lime text-zinc-950 hover:bg-brand-lime-hover font-heading font-bold text-sm tracking-wide py-6 rounded-2xl transition-all cursor-pointer flex items-center justify-center gap-2"
-            >
-              {t.report.ctaButton}
-              <ArrowRight className="w-4 h-4" />
-            </Button>
-            <span className="text-[11px] sm:text-xs text-zinc-300 font-medium">
-              {t.report.ctaPriceMicroCopy.replace("{price}", singlePrice)}
-            </span>
-          </div>
-        </div>
+        {/* Seção de Demonstração Tangível do Produto (Real Member Area Preview) */}
+        <ProductPreviewSection
+          locale={locale}
+          singlePrice={singlePrice}
+          ctaButtonText={t.report.ctaButton}
+          ctaPriceMicroCopy={t.report.ctaPriceMicroCopy}
+          onCheckout={() => {
+            trackEvent("checkout_clicked", { source: "report_bottom_cta", locale });
+            const sessionId = useQuizStore.getState().sessionId;
+            if (sessionId) {
+              sendQuizAnalyticsEvent({
+                sessionId,
+                eventType: "offer_cta_clicked",
+                payload: { source: "report_bottom_cta", locale },
+              });
+            }
+            router.push(`/${locale}/checkout`);
+          }}
+        />
       </main>
     </div>
   );
