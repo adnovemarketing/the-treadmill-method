@@ -20,6 +20,7 @@ interface PreviewImageCardProps {
   caption?: string;
   imageClassName?: string;
   containerBgClass?: string;
+  badge?: string;
 }
 
 function PreviewImageCard({
@@ -29,12 +30,18 @@ function PreviewImageCard({
   caption,
   imageClassName = "object-cover object-top",
   containerBgClass = "bg-zinc-950",
+  badge,
 }: PreviewImageCardProps) {
   const [hasError, setHasError] = useState(false);
 
   return (
     <div className="w-full flex flex-col gap-1.5">
       <div className={`w-full ${aspectClass} relative rounded-2xl overflow-hidden ${containerBgClass} border border-zinc-800 shadow-xl shadow-black/40 flex items-center justify-center`}>
+        {badge && (
+          <span className="absolute top-3 left-3 z-10 text-[9px] font-heading font-extrabold tracking-wider uppercase px-2.5 py-1 rounded-md bg-zinc-950/85 border border-zinc-700/60 text-zinc-300 backdrop-blur-sm shadow-md">
+            {badge}
+          </span>
+        )}
         {!hasError ? (
           <Image
             src={src}
@@ -113,6 +120,7 @@ export function ProductPreviewSection({
           src="/assets/product-preview/product-preview-plan.webp"
           alt="The Treadmill Method personalised plan overview"
           aspectClass="aspect-[16/10] sm:aspect-[16/9]"
+          badge={isPtBr ? "EXEMPLO ILUSTRATIVO DE MEMBRO" : "EXAMPLE MEMBER VIEW"}
         />
 
         {/* Supporting bullet points */}
