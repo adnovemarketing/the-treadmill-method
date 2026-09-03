@@ -21,6 +21,9 @@ export interface TranslationSchema {
   };
   landing: {
     badge: string;
+    bridgeEyebrow: string;
+    bridgeTitle: string;
+    bridgeDesc: string;
     titleFirstPart: string;
     titleLime: string;
     titleAnd: string;
@@ -348,6 +351,9 @@ export const translations: Record<Locale | 'pt-br', TranslationSchema> = {
     },
     landing: {
       badge: 'HIGH-PERFORMANCE JOINT PROTECTION METHOD',
+      bridgeEyebrow: "ONE WALKING TARGET DOESN'T FIT EVERYONE",
+      bridgeTitle: '10,000 steps is a generic target. Your treadmill plan should start with you.',
+      bridgeDesc: "Take the 1-minute quiz and we'll use your current fitness, treadmill access, movement comfort and routine to match you with a personalised starting programme.",
       titleFirstPart: 'Burn body fat on the treadmill',
       titleLime: 'without running',
       titleAnd: ' and ',
@@ -356,7 +362,7 @@ export const translations: Record<Locale | 'pt-br', TranslationSchema> = {
       benefit1: 'High-calorie workouts lasting from 15 to 35 minutes',
       benefit2: 'Active protocol against impact and knee strain',
       benefit3: 'Dynamic intervals that banish treadmill boredom',
-      cta: 'GET MY PERSONALISED PLAN',
+      cta: 'SEE MY PERSONALISED PLAN',
       rating: '4.9/5.0 rating',
       activeUsers: 'OVER 45,000 ACTIVE USERS',
       workoutOfTheDay: 'WORKOUT OF THE DAY',
@@ -629,8 +635,8 @@ export const translations: Record<Locale | 'pt-br', TranslationSchema> = {
       ctaPriceMicroCopy: 'One-time payment {price}',
     },
     offer: {
-      congratsBadge: 'CONGRATULATIONS! LAUNCH OFFER ACTIVE',
-      urgencyTitle: 'OFFER EXPIRES IN',
+      congratsBadge: 'ONE-TIME PAYMENT · IMMEDIATE ACCESS',
+      urgencyTitle: 'ONE-TIME PAYMENT · IMMEDIATE ACCESS',
       planSectionTitle: 'YOUR PERSONALISED OFFER:',
       singleLabel: 'The Treadmill Method — Full Access',
       singleBadge: 'ONE-TIME PAYMENT',
@@ -647,8 +653,8 @@ export const translations: Record<Locale | 'pt-br', TranslationSchema> = {
       ctaButton: 'GET MY PERSONALISED PLAN — {price}',
       secureCheckout: 'SECURE CHECKOUT',
       sslEncrypted: 'SSL ENCRYPTED',
-      guaranteeTitle: '30-Day Risk-Free Guarantee',
-      guaranteeDesc: 'We are so confident in The Treadmill Method that if you do not feel a difference in your stamina or fitness within 4 weeks of starting, simply email us for a 100% refund. No questions asked.',
+      guaranteeTitle: '30-DAY REFUND POLICY',
+      guaranteeDesc: "Try The Treadmill Method for 30 days. If it's not right for you, email us within 30 days of purchase and we'll refund your programme purchase. No performance targets or complicated conditions.",
       whatYouGetTitle: 'What is included in your plan:',
       whatYouGetItems: [
         'Instant Digital Web App & PDF Protocol Access (No waiting, access anywhere)',
@@ -680,7 +686,7 @@ export const translations: Record<Locale | 'pt-br', TranslationSchema> = {
         },
         {
           q: 'How does the refund guarantee work?',
-          a: 'If you decide the method is not for you within 30 days, just email support@thetreadmillmethod.com for an immediate 100% refund.'
+          a: "Try The Treadmill Method for 30 days. If it's not right for you, email us within 30 days of purchase and we'll refund your programme purchase."
         },
         {
           q: 'Is this a recurring subscription?',
@@ -724,6 +730,9 @@ export const translations: Record<Locale | 'pt-br', TranslationSchema> = {
     },
     landing: {
       badge: 'MÉTODO DE ALTA PERFORMANCE ARTICULAR',
+      bridgeEyebrow: 'UMA ÚNICA META DE PASSOS NÃO SERVE PARA TODO MUNDO',
+      bridgeTitle: '10.000 passos é uma meta genérica. Seu plano de esteira deve começar por você.',
+      bridgeDesc: 'Faça o quiz de 1 minuto e usaremos seu condicionamento atual, acesso à esteira, conforto articular e rotina para encontrar seu programa inicial personalizado.',
       titleFirstPart: 'Queime gordura na esteira ',
       titleLime: 'sem correr',
       titleAnd: ' e ',
@@ -732,7 +741,7 @@ export const translations: Record<Locale | 'pt-br', TranslationSchema> = {
       benefit1: 'Planos de 15 a 35 minutos altamente calóricos',
       benefit2: 'Protocolo ativo contra impactos e dores nos joelhos',
       benefit3: 'Intervalados dinâmicos que cortam a monotonia',
-      cta: 'QUERO MEU PLANO PERSONALIZADO',
+      cta: 'VER MEU PLANO PERSONALIZADO',
       rating: 'Avaliação de 4.9/5.0',
       activeUsers: 'MAIS DE 45.000 ALUNOS ATIVOS',
       workoutOfTheDay: 'TREINO DO DIA',
@@ -1005,8 +1014,8 @@ export const translations: Record<Locale | 'pt-br', TranslationSchema> = {
       ctaPriceMicroCopy: 'Pagamento único de {price}',
     },
     offer: {
-      congratsBadge: 'PARABÉNS! DESCONTO DE LANÇAMENTO ATIVO',
-      urgencyTitle: 'DESCONTO EXPIRA EM',
+      congratsBadge: 'PAGAMENTO ÚNICO · ACESSO IMEDIATO',
+      urgencyTitle: 'PAGAMENTO ÚNICO · ACESSO IMEDIATO',
       planSectionTitle: 'SUA OFERTA PERSONALIZADA:',
       singleLabel: 'The Treadmill Method — Acesso Completo',
       singleBadge: 'PAGAMENTO ÚNICO',
@@ -1023,8 +1032,8 @@ export const translations: Record<Locale | 'pt-br', TranslationSchema> = {
       ctaButton: 'OBTER MEU PLANO PERSONALIZADO — {price}',
       secureCheckout: 'CHECKOUT SEGURO',
       sslEncrypted: 'SSL ENCRIPTADO',
-      guaranteeTitle: 'Garantia Incondicional de 30 Dias',
-      guaranteeDesc: 'Temos tanta confiança na metodologia do The Treadmill Method que se você não notar evolução na sua queima calórica ou fôlego nas primeiras 4 semanas de treinos diários, devolvemos 100% do seu dinheiro.',
+      guaranteeTitle: 'POLÍTICA DE REEMBOLSO DE 30 DIAS',
+      guaranteeDesc: 'Experimente o The Treadmill Method por 30 dias. Se não for ideal para você, envie um e-mail em até 30 dias após a compra e reembolsaremos a compra do seu programa. Sem metas de desempenho ou condições complicadas.',
       whatYouGetTitle: 'O que você vai receber hoje:',
       whatYouGetItems: [
         'Acesso Instantâneo ao Web App Digital e Protocolos PDF (Sem espera, acesse de qualquer lugar)',
@@ -1056,7 +1065,7 @@ export const translations: Record<Locale | 'pt-br', TranslationSchema> = {
         },
         {
           q: 'Como funciona a garantia de reembolso?',
-          a: 'Se em até 30 dias você decidir que o método não é para você, basta nos enviar um e-mail para suporte@thetreadmillmethod.com e processamos o estorno de 100% do seu valor imediatamente.'
+          a: 'Experimente o The Treadmill Method por 30 dias. Se não for ideal para você, basta nos enviar um e-mail para suporte@thetreadmillmethod.com em até 30 dias após a compra e reembolsaremos a compra do seu programa.'
         },
         {
           q: 'Este pagamento é uma assinatura recorrente?',

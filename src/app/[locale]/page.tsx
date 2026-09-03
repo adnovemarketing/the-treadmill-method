@@ -50,6 +50,19 @@ export default function HomePage() {
         <div className="max-w-5xl mx-auto px-6 py-8 md:py-16 grid grid-cols-1 md:grid-cols-12 gap-8 md:gap-12 items-center w-full">
           {/* Coluna de Texto */}
           <div className="md:col-span-7 flex flex-col gap-5 text-left order-2 md:order-1">
+            {/* 10,000 Steps Ad-Congruence Message Bridge */}
+            <div className="border border-brand-lime/20 bg-brand-lime/5 p-3.5 sm:p-4 rounded-2xl flex flex-col gap-1.5">
+              <span className="text-[10px] font-heading font-black text-brand-lime uppercase tracking-wider">
+                {t.landing.bridgeEyebrow}
+              </span>
+              <p className="text-xs sm:text-sm font-heading font-black text-zinc-100 uppercase leading-snug">
+                {t.landing.bridgeTitle}
+              </p>
+              <p className="text-[11px] sm:text-xs text-zinc-300 leading-relaxed">
+                {t.landing.bridgeDesc}
+              </p>
+            </div>
+
             <div className="inline-flex items-center gap-2 bg-brand-lime/10 border border-brand-lime/20 px-3 py-1 rounded-full w-fit">
               <Trophy className="w-3.5 h-3.5 text-brand-lime" />
               <span className="text-[10px] font-heading font-black text-brand-lime uppercase tracking-wider">

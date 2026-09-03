@@ -57,43 +57,12 @@ export default function CheckoutPage() {
   const { data: quizData } = useQuizStore();
 
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [includeMobilityProtocol, setIncludeMobilityProtocol] = useState(false);
+  const includeMobilityProtocol = false;
   const [error, setError] = useState<string | null>(null);
-
-  const [timeLeft, setTimeLeft] = useState<number>(() => {
-    if (typeof window !== "undefined") {
-      const savedTime = sessionStorage.getItem("treadmill-method-timer");
-      if (savedTime) {
-        const parsedTime = parseInt(savedTime, 10);
-        if (parsedTime > 0) return parsedTime;
-      }
-    }
-    return 900;
-  });
-
-  useEffect(() => {
-    if (timeLeft <= 0) return;
-
-    const timer = setInterval(() => {
-      setTimeLeft((prev) => {
-        const next = prev - 1;
-        sessionStorage.setItem("treadmill-method-timer", String(next));
-        return next;
-      });
-    }, 1000);
-
-    return () => clearInterval(timer);
-  }, [timeLeft]);
 
   useEffect(() => {
     trackEvent("offer_viewed", { locale });
   }, [locale]);
-
-  const formatTime = (seconds: number) => {
-    const m = Math.floor(seconds / 60);
-    const s = seconds % 60;
-    return `${m.toString().padStart(2, "0")}:${s.toString().padStart(2, "0")}`;
-  };
 
   const handleCheckout = async () => {
     if (isSubmitting) return;
@@ -163,7 +132,7 @@ export default function CheckoutPage() {
 
 
   const singlePrice = formatCurrency(config.prices.single, locale);
-  const totalAmount = includeMobilityProtocol ? (config.prices.single + 4.90) : config.prices.single;
+  const totalAmount = config.prices.single;
   const currentTotalPrice = formatCurrency(totalAmount, locale);
 
   // Personalised plan name for the checkout headline
@@ -203,16 +172,6 @@ export default function CheckoutPage() {
                     : `Your personalised plan — ${personalisedPlan} — is ready below.`}
                 </p>
               ) : null}
-            </div>
-
-            {/* Cronômetro */}
-            <div className="bg-zinc-900/40 border border-zinc-900 p-4 rounded-2xl text-center flex flex-col gap-1">
-              <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">
-                {t.offer.urgencyTitle}
-              </span>
-              <span className="text-xl font-heading font-black text-brand-lime tracking-widest animate-pulse">
-                {formatTime(timeLeft)}
-              </span>
             </div>
 
             {/* Oferta Única */}
@@ -284,52 +243,6 @@ export default function CheckoutPage() {
                 <div className="flex items-center justify-center gap-2 text-[10px] text-zinc-400 mt-0.5 select-none">
                   <Lock className="w-3 h-3 text-brand-teal shrink-0" />
                   <span>{t.offer.secureCheckout} • {t.offer.sslEncrypted}</span>
-                </div>
-              </div>
-
-              {/* Order Bump: 5-Minute Mobility Protocol */}
-              <div
-                onClick={() => setIncludeMobilityProtocol(!includeMobilityProtocol)}
-                className={cn(
-                  "w-full text-left p-4.5 rounded-2xl border transition-all cursor-pointer select-none relative flex flex-col gap-2.5 mt-2 md:mt-0",
-                  includeMobilityProtocol
-                    ? "bg-brand-lime/10 border-brand-lime shadow-md shadow-lime-400/5"
-                    : "bg-zinc-900/60 border-zinc-800 hover:border-zinc-700"
-                )}
-              >
-                <div className="flex items-start gap-3">
-                  <input
-                    type="checkbox"
-                    checked={includeMobilityProtocol}
-                    onChange={(e) => setIncludeMobilityProtocol(e.target.checked)}
-                    onClick={(e) => e.stopPropagation()}
-                    className="mt-1 w-4 h-4 rounded border-zinc-700 bg-zinc-950 text-brand-lime focus:ring-brand-lime cursor-pointer accent-brand-lime shrink-0"
-                  />
-                  <div className="flex flex-col gap-1 flex-1">
-                    <div className="flex items-center justify-between gap-2 flex-wrap">
-                      <div className="flex items-center gap-2">
-                        <span className="text-xs font-heading font-black text-zinc-100 uppercase tracking-tight">
-                          {locale === "pt-br"
-                            ? "Adicionar o Protocolo de Mobilidade Pré & Pós Caminhada (5 Minutos)"
-                            : "Add the 5-Minute Pre & Post Walk Mobility Protocol"}
-                        </span>
-                        <span className="text-[9px] font-heading font-extrabold px-2 py-0.5 rounded-full uppercase tracking-wider bg-zinc-800 text-zinc-300 border border-zinc-700">
-                          {locale === "pt-br" ? "OPCIONAL" : "OPTIONAL"}
-                        </span>
-                      </div>
-                      <span className="text-xs font-heading font-black text-brand-lime">
-                        + {formatCurrency(4.9, locale)}
-                      </span>
-                    </div>
-                    <p className="text-[11px] text-zinc-400 leading-relaxed">
-                      {locale === "pt-br"
-                        ? "Uma rotina simples e ilustrada para preparar tornozelos, joelhos e quadril antes da caminhada — e ajudar seu corpo a desacelerar depois."
-                        : "A simple illustrated routine to prepare your ankles, knees and hips before treadmill walking — and help your body wind down afterwards."}
-                    </p>
-                    <div className="flex items-center gap-1.5 text-[10px] font-bold text-brand-lime mt-0.5">
-                      <span>{includeMobilityProtocol ? (locale === "pt-br" ? "✓ Adicionado ao plano" : "✓ Added to your plan") : (locale === "pt-br" ? "+ Adicionar ao meu plano" : "+ Add to my plan")}</span>
-                    </div>
-                  </div>
                 </div>
               </div>
             </div>
@@ -536,7 +449,7 @@ export default function CheckoutPage() {
               <div className="w-10 h-10 relative shrink-0">
                 <Image
                   src={VISUAL_ASSETS.trust.guarantee}
-                  alt={locale === "pt-br" ? "Garantia de 30 Dias" : "30-Day Guarantee"}
+                  alt={locale === "pt-br" ? "Política de Reembolso de 30 Dias" : "30-Day Refund Policy"}
                   fill
                   sizes="40px"
                   className="object-contain"
@@ -674,14 +587,14 @@ export default function CheckoutPage() {
                   <div className="w-6 h-6 relative shrink-0">
                     <Image
                       src={VISUAL_ASSETS.trust.guarantee}
-                      alt={locale === "pt-br" ? "Garantia de 30 Dias" : "30-Day Guarantee"}
+                      alt={locale === "pt-br" ? "Política de Reembolso de 30 Dias" : "30-Day Refund Policy"}
                       fill
                       sizes="24px"
                       className="object-contain"
                     />
                   </div>
                   <span className="text-[9px] font-black text-zinc-300 leading-tight uppercase tracking-wider">
-                    {locale === "pt-br" ? "Garantia 30 D" : "30D Guarantee"}
+                    {locale === "pt-br" ? "Garantia 30 D" : "30-Day Policy"}
                   </span>
                 </div>
 
